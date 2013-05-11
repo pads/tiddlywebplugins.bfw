@@ -3,17 +3,15 @@ import os
 from setuptools import setup, find_packages
 
 from tiddlywebplugins.bfw import (__version__ as VERSION, __author__ as AUTHOR,
-        __license__ as LICENSE)
+        __license__ as LICENSE, __doc__ as DESC)
 
-
-DESC = open(os.path.join(os.path.dirname(__file__), 'README')).read()
 
 META = {
     'name': 'tiddlywebplugins.bfw',
     'url': 'https://github.com/FND/tiddlywebplugins.bfw',
     'version': VERSION,
     'description': 'Barely Functioning Wiki',
-    'long_description': DESC,
+    'long_description': DESC.strip(),
     'license': LICENSE,
     'author': AUTHOR,
     'author_email': '',

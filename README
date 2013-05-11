@@ -1,0 +1,15 @@
+[Barely Functioning Wiki](https://github.com/FND/tiddlywebplugins.bfw)
+
+wiki-like system for individuals and small teams, emphasizing micro-content and
+based on [TiddlyWeb](http://tiddlyweb.com)
+
+
+Contributing
+------------
+
+* install dependencies (optionally using virtualenv):
+
+        $ pip install --use-mirrors \
+            `python -c 'from setup import META; print " ".join(META["extras_require"]["testing"] + META["install_requires"])'`
+
+* run tests: `make test`
