@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# monitor a directory for changes, executing the given command
+#
+# Usage:
+#   $ reloader <directory> <pattern> <command> [parameters]
+#
+# Example:
+#   $ reloader ./ '^.*\.py$$' twanager server &
+
+set -e
+
+watch_dir="${1:?}"
+shift
+pattern="${1:?}"
+shift
+cmd="${1:?}"
+shift
+params=$@
+
+watch_dir="`realpath $watch_dir`/"
+
+echo "monitoring $watch_dir for '$pattern' with \`$cmd $params\`"
+inotifywait -mrqe close_write --format '%w%f' "$watch_dir" | \
+		while read filepath; do
+			if [[ "$filepath" =~ $pattern ]]; then
+				echo "detected change in $filepath"
+				kill $pid || true
+				$cmd $params &
+				pid="$!"
+			fi
+		done
+
+exit 0
