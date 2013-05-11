@@ -25,7 +25,7 @@ META = {
     'install_requires': ['tiddlyweb', 'tiddlywebplugins.utils',
             'tiddlywebplugins.templates'],
     'extras_require': {
-        'testing': ['pytest'],
+        'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
         'coverage': ['figleaf', 'coverage']
     }
 }
