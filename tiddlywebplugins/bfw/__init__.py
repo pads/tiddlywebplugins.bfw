@@ -11,4 +11,13 @@ __license__ = 'MIT'
 
 
 def init(config):
-    pass
+    try:
+        selector = config['selector']
+    except KeyError: # twanager mode
+        return
+
+    from tiddlywebplugins.utils import replace_handler
+    from . import web
+
+    replace_handler(selector, '/', GET=web.frontpage)
+    selector.add('/register', POST=web.register_user)

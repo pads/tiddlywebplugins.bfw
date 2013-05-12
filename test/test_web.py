@@ -1,31 +1,64 @@
+import os
+import shutil
+import tempfile
+
 import httplib2
 import wsgi_intercept
 
+from urllib import urlencode
 from wsgi_intercept import httplib2_intercept
 
-from tiddlyweb.config import config
+from tiddlyweb.config import config as CONFIG
 from tiddlyweb.web.serve import load_app
 
 
 def setup_module(module):
-    _initialize_app()
+    module.TMPDIR = tempfile.mkdtemp()
+    _initialize_app(TMPDIR)
 
 
-def test_response():
-    http = httplib2.Http()
-    response, content = http.request('http://example.org:8001/',
-            method='GET', headers={ 'Accept': 'text/html' })
+def teardown_module(module):
+    shutil.rmtree(TMPDIR)
+
+
+def test_root():
+    response, content = _req('GET', '/')
     assert response.status == 200
     assert response['content-type'] == 'text/html; charset=UTF-8'
 
+    assert '<a href="/challenge">Log in</a>' in content
+    assert 'Register' in content
 
-def _initialize_app():
-    config['server_host'] = {
+
+def test_user_registration():
+    headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+    data = {
+        'username': 'fnd',
+        'password': 'foo',
+        'password_confirmation': 'foo'
+    }
+    response, content = _req('POST', '/register', urlencode(data),
+            headers=headers)
+    assert response.status == 302
+
+
+def _initialize_app(tmpdir): # XXX: side-effecty
+    CONFIG['server_host'] = {
         'scheme': 'http',
         'host': 'example.org',
         'port': '8001',
     }
-    config['system_plugins'].append('tiddlywebplugins.bfw')
+    # TODO: test with server_prefix
+    CONFIG['system_plugins'].append('tiddlywebplugins.bfw')
+    CONFIG['server_store'] = ['text', {
+        'store_root': os.path.join(tmpdir, 'store')
+    }]
 
     httplib2_intercept.install()
     wsgi_intercept.add_wsgi_intercept('example.org', 8001, load_app)
+
+
+def _req(method, uri, body=None, **kwargs):
+    http = httplib2.Http()
+    return http.request('http://example.org:8001%s' % uri, method, body,
+            **kwargs)
