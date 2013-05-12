@@ -42,6 +42,25 @@ def test_user_registration():
     assert response.status == 302
 
 
+def test_login():
+    headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+    data = {
+        'user': 'fnd',
+        'password': 'foo'
+    }
+    try:
+        _req('POST', '/challenge/cookie_form', urlencode(data),
+                headers=headers, redirections=0)
+    except httplib2.RedirectLimit, exc:
+        redirected = True
+        response = exc.response
+        content = exc.content
+
+    assert redirected
+    assert response.status == 303
+    assert 'tiddlyweb_user="fnd:' in response['set-cookie']
+
+
 def _initialize_app(tmpdir): # XXX: side-effecty
     CONFIG['server_host'] = {
         'scheme': 'http',
@@ -60,5 +79,5 @@ def _initialize_app(tmpdir): # XXX: side-effecty
 
 def _req(method, uri, body=None, **kwargs):
     http = httplib2.Http()
-    return http.request('http://example.org:8001%s' % uri, method, body,
-            **kwargs)
+    return http.request('http://example.org:8001%s' % uri, method=method,
+            body=body, **kwargs)
