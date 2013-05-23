@@ -2,6 +2,7 @@ from httpexceptor import HTTP302, HTTP400, HTTP409, HTTP415
 
 from tiddlyweb.model.user import User
 from tiddlyweb.store import NoUserError
+from tiddlyweb.web.util import make_cookie
 
 from tiddlywebplugins.templates import get_template
 
@@ -36,9 +37,16 @@ def register_user(environ, start_response):
     user.set_password(password)
     store.put(user)
 
-    # TODO: log in automatically
     server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    raise HTTP302('%s/' % server_prefix)
+    root_uri = '%s/' % server_prefix
+
+    cookie = make_cookie('tiddlyweb_user', user.usersign, path=root_uri,
+            mac_key=environ['tiddlyweb.config']['secret'],
+            expires=environ['tiddlyweb.config'].get('cookie_age', None))
+
+    start_response('303 See Other',
+            [('Set-Cookie', cookie), ('Location', root_uri)])
+    return ['']
 
 
 def _render_template(environ, start_response, name, status='200 OK', headers={},

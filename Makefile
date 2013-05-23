@@ -9,7 +9,7 @@ server: terminate
 terminate:
 	ps -o pgid -p `cat .server.pid` | tail -n1 | while read pgid; do \
 			kill -TERM -$$pgid || true; done
-	rm .server.pid
+	rm .server.pid || true
 
 test: clean
 	py.test -s --tb=short test
