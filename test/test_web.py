@@ -98,6 +98,18 @@ def test_login():
     assert response.status == 303
     assert 'tiddlyweb_user="fnd:' in response['set-cookie']
 
+    try:
+        _req('POST', '/logout', redirections=0)
+    except httplib2.RedirectLimit, exc:
+        redirected = True
+        response = exc.response
+        content = exc.content
+
+    assert redirected
+    assert response.status == 303
+    assert response['set-cookie'] == 'tiddlyweb_user=; Max-Age=0; Path=/'
+    assert response['location'] == 'http://example.org:8001/'
+
 
 def _initialize_app(tmpdir): # XXX: side-effecty
     CONFIG['server_host'] = {

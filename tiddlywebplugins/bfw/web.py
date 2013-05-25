@@ -4,6 +4,7 @@ from tiddlyweb.model.user import User
 from tiddlyweb.store import NoUserError
 from tiddlyweb.web.util import make_cookie
 
+from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
 
 
@@ -61,6 +62,13 @@ def register_user(environ, start_response):
     start_response('303 See Other',
             [('Set-Cookie', cookie), ('Location', root_uri)])
     return ['']
+
+
+def logout(environ, start_response):
+    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
+
+    environ['tiddlyweb.query']['tiddlyweb_redirect'] = ['%s/' % server_prefix]
+    return logout_handler(environ, start_response)
 
 
 def _render_template(environ, start_response, name, status='200 OK', headers={},
