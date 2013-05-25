@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<p>hello {{ user }}</p>
+
+<h3>Your Spaces</h3>
+<ul>
+    {% for space in spaces %}
+    <li>{{ space }}</li>
+    {% endfor %}
+<ul>
+
+
+{% endblock %}

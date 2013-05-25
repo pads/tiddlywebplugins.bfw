@@ -8,13 +8,21 @@ import wsgi_intercept
 from urllib import urlencode
 from wsgi_intercept import httplib2_intercept
 
+from tiddlyweb.model.user import User
 from tiddlyweb.config import config as CONFIG
 from tiddlyweb.web.serve import load_app
+from tiddlywebplugins.utils import get_store
 
 
 def setup_module(module):
     module.TMPDIR = tempfile.mkdtemp()
+
     _initialize_app(TMPDIR)
+
+    store = get_store(CONFIG)
+    user = User('admin')
+    user.set_password('secret')
+    store.put(user)
 
 
 def teardown_module(module):
@@ -28,6 +36,29 @@ def test_root():
 
     assert '<a href="/challenge">Log in</a>' in content
     assert 'Register' in content
+
+    try:
+        _req('GET', '/', headers={
+            'Cookie': 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
+        }, redirections=0)
+    except httplib2.RedirectLimit, exc:
+        redirected = True
+        response = exc.response
+        content = exc.content
+
+    assert redirected
+    assert response.status == 302
+    assert response['location'] == '/~'
+
+
+def test_home():
+    response, content = _req('GET', '/~')
+    assert response.status == 401
+
+    response, content = _req('GET', '/~', headers={
+        'Cookie': 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
+    })
+    assert response.status == 200
 
 
 def test_user_registration():
@@ -79,6 +110,7 @@ def _initialize_app(tmpdir): # XXX: side-effecty
     CONFIG['server_store'] = ['text', {
         'store_root': os.path.join(tmpdir, 'store')
     }]
+    CONFIG['secret'] = '0d67d5bbb6c002614efeaf296330fb43'
 
     httplib2_intercept.install()
     wsgi_intercept.add_wsgi_intercept('example.org', 8001, load_app)

@@ -20,4 +20,5 @@ def init(config):
     from . import web
 
     replace_handler(selector, '/', GET=web.frontpage)
+    selector.add('/~', GET=web.home)
     selector.add('/register', POST=web.register_user)

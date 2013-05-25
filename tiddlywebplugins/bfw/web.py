@@ -1,4 +1,4 @@
-from httpexceptor import HTTP302, HTTP400, HTTP409, HTTP415
+from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP409, HTTP415
 
 from tiddlyweb.model.user import User
 from tiddlyweb.store import NoUserError
@@ -8,13 +8,27 @@ from tiddlywebplugins.templates import get_template
 
 
 def frontpage(environ, start_response):
+    current_user = environ['tiddlyweb.usersign']['name']
     server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    uris = {
-        'register': '%s/register' % server_prefix,
-        'login': '%s/challenge' % server_prefix
-    }
-    return _render_template(environ, start_response, 'frontpage.html',
-            uris=uris)
+
+    if current_user != 'GUEST': # auth'd
+        raise HTTP302('%s/~' % server_prefix)
+    else: # unauth'd
+        uris = {
+            'register': '%s/register' % server_prefix,
+            'login': '%s/challenge' % server_prefix
+        }
+        return _render_template(environ, start_response, 'frontpage.html',
+                uris=uris)
+
+
+def home(environ, start_response):
+    current_user = environ['tiddlyweb.usersign']['name']
+    if current_user == 'GUEST':
+        raise HTTP401
+
+    return _render_template(environ, start_response, 'home.html',
+            user=current_user)
 
 
 def register_user(environ, start_response):
