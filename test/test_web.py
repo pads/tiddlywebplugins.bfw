@@ -14,6 +14,9 @@ from tiddlyweb.web.serve import load_app
 from tiddlywebplugins.utils import get_store
 
 
+ADMIN_COOKIE = 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
+
+
 def setup_module(module):
     module.TMPDIR = tempfile.mkdtemp()
 
@@ -38,9 +41,7 @@ def test_root():
     assert 'Register' in content
 
     try:
-        _req('GET', '/', headers={
-            'Cookie': 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
-        }, redirections=0)
+        _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE }, redirections=0)
     except httplib2.RedirectLimit, exc:
         redirected = True
         response = exc.response
@@ -55,9 +56,7 @@ def test_home():
     response, content = _req('GET', '/~')
     assert response.status == 401
 
-    response, content = _req('GET', '/~', headers={
-        'Cookie': 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
-    })
+    response, content = _req('GET', '/~', headers={ 'Cookie': ADMIN_COOKIE })
     assert response.status == 200
 
 
@@ -79,6 +78,7 @@ def test_user_registration():
     assert redirected
     assert response.status == 303
     assert 'tiddlyweb_user="fnd:' in response['set-cookie']
+
 
 def test_login():
     headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
