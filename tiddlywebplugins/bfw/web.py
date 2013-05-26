@@ -26,7 +26,7 @@ def frontpage(environ, start_response):
 def home(environ, start_response):
     current_user = environ['tiddlyweb.usersign']['name']
     if current_user == 'GUEST':
-        raise HTTP401
+        raise HTTP401('unauthorized')
 
     return _render_template(environ, start_response, 'home.html',
             user=current_user)
@@ -42,12 +42,12 @@ def register_user(environ, start_response):
     store = environ['tiddlyweb.store']
     try:
         store.get(user)
-        raise HTTP409('username unavailable') # TODO: friendly error page
+        raise HTTP409('username unavailable')
     except NoUserError:
         pass
 
     if not password == confirmation:
-        raise HTTP400('passwords do not match') # TODO: friendly error page
+        raise HTTP400('passwords do not match')
 
     user.set_password(password)
     store.put(user)
@@ -83,4 +83,4 @@ def _render_template(environ, start_response, name, status='200 OK', headers={},
 def _ensure_form_submission(environ): # TODO: turn into decorator
     content_type = environ.get('CONTENT_TYPE', '')
     if not content_type.startswith('application/x-www-form-urlencoded'):
-        raise HTTP415 # TODO: friendly error page
+        raise HTTP415('unsupported content type')

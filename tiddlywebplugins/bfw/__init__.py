@@ -17,7 +17,9 @@ def init(config):
         return
 
     from tiddlywebplugins.utils import replace_handler
-    from . import web
+    from . import web, middleware
+
+    config['server_response_filters'].insert(0, middleware.FriendlyError) # XXX: position arbitrary!?
 
     replace_handler(selector, '/', GET=web.frontpage)
     selector.add('/~', GET=web.home)

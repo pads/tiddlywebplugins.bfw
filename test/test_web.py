@@ -111,6 +111,52 @@ def test_login():
     assert response['location'] == 'http://example.org:8001/'
 
 
+def test_errors():
+    #response, content = _req('GET', '/N/A')
+    #assert response.status == 404
+    #assert '<html>' in content
+    #assert 'not found' in content
+
+    #response, content = _req('POST', '/')
+    #assert response.status == 405
+    #assert '<html>' in content
+    #assert 'not allowed' in content
+
+    response, content = _req('GET', '/~')
+    assert response.status == 401
+    assert '<html>' in content
+    assert 'unauthorized' in content
+
+    response, content = _req('POST', '/register')
+    assert response.status == 415
+    assert '<html>' in content
+    assert 'unsupported' in content
+
+    data = {
+        'username': 'foo',
+        'password': 'bar',
+        'password_confirmation': 'baz'
+    }
+    headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+    response, content = _req('POST', '/register', urlencode(data),
+            headers=headers)
+    assert response.status == 400
+    assert '<html>' in content
+    assert 'passwords do not match' in content
+
+    data = {
+        'username': 'admin',
+        'password': 'foo',
+        'password_confirmation': 'foo'
+    }
+    headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+    response, content = _req('POST', '/register', urlencode(data),
+            headers=headers)
+    assert response.status == 409
+    assert '<html>' in content
+    assert 'username unavailable' in content
+
+
 def _initialize_app(tmpdir): # XXX: side-effecty
     CONFIG['server_host'] = {
         'scheme': 'http',
