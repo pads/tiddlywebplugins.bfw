@@ -112,15 +112,15 @@ def test_login():
 
 
 def test_errors():
-    #response, content = _req('GET', '/N/A')
-    #assert response.status == 404
-    #assert '<html>' in content
-    #assert 'not found' in content
+    response, content = _req('GET', '/N/A')
+    assert response.status == 404
+    assert '<html>' in content
+    assert 'not found' in content
 
-    #response, content = _req('POST', '/')
-    #assert response.status == 405
-    #assert '<html>' in content
-    #assert 'not allowed' in content
+    response, content = _req('POST', '/')
+    assert response.status == 405
+    assert '<html>' in content
+    assert 'not allowed' in content
 
     response, content = _req('GET', '/~')
     assert response.status == 401
