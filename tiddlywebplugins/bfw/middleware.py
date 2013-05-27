@@ -15,7 +15,7 @@ class FriendlyError(object):
         try:
             return self.application(environ, start_response)
         except HTTPException, exc:
-            if exc.__class__.__name__.startswith("HTTP4"): # XXX: hacky!?
+            if exc.status.startswith('4'):
                 return _render_template(environ, start_response, 'error.html',
                         status=exc.status, message=exc.message)
             else:
