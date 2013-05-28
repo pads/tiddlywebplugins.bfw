@@ -40,14 +40,8 @@ def test_root():
     assert '<a href="/challenge">Log in</a>' in content
     assert 'Register' in content
 
-    try:
-        _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE }, redirections=0)
-    except httplib2.RedirectLimit, exc:
-        redirected = True
-        response = exc.response
-        content = exc.content
+    response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
 
-    assert redirected
     assert response.status == 302
     assert response['location'] == '/~'
 
@@ -67,15 +61,9 @@ def test_user_registration():
         'password': 'foo',
         'password_confirmation': 'foo'
     }
-    try:
-        _req('POST', '/register', urlencode(data), headers=headers,
-                redirections=0)
-    except httplib2.RedirectLimit, exc:
-        redirected = True
-        response = exc.response
-        content = exc.content
+    response, content = _req('POST', '/register', urlencode(data),
+            headers=headers,)
 
-    assert redirected
     assert response.status == 303
     assert 'tiddlyweb_user="fnd:' in response['set-cookie']
 
@@ -86,26 +74,14 @@ def test_login():
         'user': 'fnd',
         'password': 'foo'
     }
-    try:
-        _req('POST', '/challenge/cookie_form', urlencode(data), headers=headers,
-                redirections=0)
-    except httplib2.RedirectLimit, exc:
-        redirected = True
-        response = exc.response
-        content = exc.content
+    response, content = _req('POST', '/challenge/cookie_form', urlencode(data),
+            headers=headers)
 
-    assert redirected
     assert response.status == 303
     assert 'tiddlyweb_user="fnd:' in response['set-cookie']
 
-    try:
-        _req('POST', '/logout', redirections=0)
-    except httplib2.RedirectLimit, exc:
-        redirected = True
-        response = exc.response
-        content = exc.content
+    response, content = _req('POST', '/logout')
 
-    assert redirected
     assert response.status == 303
     assert response['set-cookie'] == 'tiddlyweb_user=; Max-Age=0; Path=/'
     assert response['location'] == 'http://example.org:8001/'
@@ -176,5 +152,6 @@ def _initialize_app(tmpdir): # XXX: side-effecty
 
 def _req(method, uri, body=None, **kwargs):
     http = httplib2.Http()
+    http.follow_redirects = False
     return http.request('http://example.org:8001%s' % uri, method=method,
             body=body, **kwargs)
