@@ -62,7 +62,7 @@ def test_user_registration():
         'password_confirmation': 'foo'
     }
     response, content = _req('POST', '/register', urlencode(data),
-            headers=headers,)
+            headers=headers)
 
     assert response.status == 303
     assert 'tiddlyweb_user="fnd:' in response['set-cookie']
@@ -85,6 +85,44 @@ def test_login():
     assert response.status == 303
     assert response['set-cookie'] == 'tiddlyweb_user=; Max-Age=0; Path=/'
     assert response['location'] == 'http://example.org:8001/'
+
+
+def test_wiki_creation():
+    default_headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+    data = {
+        'wiki': 'foo',
+        'private': '1'
+    }
+
+    response, content = _req('POST', '/wikis')
+    assert response.status == 415
+
+    response, content = _req('POST', '/wikis', urlencode(data),
+            headers=default_headers)
+    assert response.status == 401
+
+    headers = { 'Cookie': ADMIN_COOKIE }
+    headers.update(default_headers)
+    response, content = _req('POST', '/wikis', urlencode(data), headers=headers)
+    assert response.status == 303
+    assert response['location'] == '/foo'
+
+    response, content = _req('GET', '/foo', headers={ 'Cookie': ADMIN_COOKIE })
+    assert response.status == 200
+
+    response, content = _req('GET', '/foo')
+    assert response.status == 401
+
+    # TODO: test non-private wiki results
+
+    response, content = _req('POST', '/wikis', urlencode(data),
+            headers={ 'Cookie': ADMIN_COOKIE })
+    assert response.status == 409
+
+    data['wiki'] = 'wikis'
+    response, content = _req('POST', '/wikis', urlencode(data),
+            headers={ 'Cookie': ADMIN_COOKIE })
+    assert response.status == 409
 
 
 def test_errors():

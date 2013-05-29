@@ -32,6 +32,23 @@ def home(environ, start_response):
             user=current_user)
 
 
+def create_wiki(environ, start_response):
+    _ensure_form_submission(environ)
+
+    current_user = environ['tiddlyweb.usersign']['name']
+    if current_user == 'GUEST':
+        raise HTTP401('unauthorized')
+
+    wiki_name = environ['tiddlyweb.query']['wiki'][0] # TODO: validate
+    private = environ['tiddlyweb.query']['private'][0] == '1'
+
+    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
+    wiki_uri = '%s/%s' % (server_prefix, wiki_name) # XXX: should include host!?
+
+    start_response('303 See Other', [('Location', wiki_uri)])
+    return ['']
+
+
 def register_user(environ, start_response):
     _ensure_form_submission(environ)
 
