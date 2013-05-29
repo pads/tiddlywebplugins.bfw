@@ -18,9 +18,11 @@ def init(config):
             'method not allowed')
 
     replace_handler(selector, '/', GET=web.frontpage)
-    selector.add('/~', GET=web.home)
-    selector.add('/register', POST=web.register_user)
+    selector.add('/~', GET=web.user_home)
+    selector.add('/register', POST=web.register_user) # XXX: verb as URI
+    selector.add('/wikis', POST=web.create_wiki) # XXX: bad URI?
     selector.add('/logout', POST=web.logout)
+    selector.add('/{wiki_name:segment}', GET=web.wiki_home)
 
 
 def _error_handler(status, message):

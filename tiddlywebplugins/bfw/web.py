@@ -1,8 +1,10 @@
-from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP409, HTTP415
+from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
+from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
-from tiddlyweb.store import NoUserError
-from tiddlyweb.web.util import make_cookie
+from tiddlyweb.model.policy import Policy, UserRequiredError
+from tiddlyweb.store import NoBagError, NoUserError
+from tiddlyweb.web.util import get_route_value, make_cookie
 
 from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
@@ -23,13 +25,68 @@ def frontpage(environ, start_response):
                 uris=uris)
 
 
-def home(environ, start_response):
+def user_home(environ, start_response):
     current_user = environ['tiddlyweb.usersign']['name']
     if current_user == 'GUEST':
         raise HTTP401('unauthorized')
 
-    return _render_template(environ, start_response, 'home.html',
+    return _render_template(environ, start_response, 'user_home.html',
             user=current_user)
+
+
+def wiki_home(environ, start_response):
+    current_user = environ['tiddlyweb.usersign']['name']
+    wiki_name = get_route_value(environ, 'wiki_name')
+
+    bag = Bag(wiki_name)
+    store = environ['tiddlyweb.store']
+    try:
+        bag = store.get(bag)
+    except NoBagError:
+        raise HTTP404('wiki not found')
+
+    user = User(current_user)
+    try:
+        user = store.get(user)
+    except NoUserError:
+        pass
+    bag.policy.allows({ 'name': user.usersign, 'roles': user.roles }, 'read')
+
+    return _render_template(environ, start_response, 'layout.html')
+
+
+def create_wiki(environ, start_response):
+    _ensure_form_submission(environ)
+
+    current_user = environ['tiddlyweb.usersign']['name']
+    if current_user == 'GUEST':
+        raise HTTP401('unauthorized')
+
+    wiki_name = environ['tiddlyweb.query']['wiki'][0] # TODO: validate
+    private = environ['tiddlyweb.query']['private'][0] == '1'
+    store = environ['tiddlyweb.store']
+
+    # check reserved terms
+    if wiki_name in ['bags', 'recipes', 'wikis', '~', 'register', 'logout']: # XXX: too manual, hard to keep in sync
+        raise HTTP409('wiki name unavailable')
+
+    bag = Bag(wiki_name)
+    try:
+        store.get(bag)
+        raise HTTP409('wiki name unavailable')
+    except NoBagError:
+        pass
+
+    if private:
+        bag.policy = Policy(read=[current_user])
+
+    store.put(bag)
+
+    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
+    wiki_uri = '%s/%s' % (server_prefix, wiki_name) # XXX: should include host!?
+
+    start_response('303 See Other', [('Location', wiki_uri)])
+    return ['']
 
 
 def register_user(environ, start_response):
