@@ -45,12 +45,7 @@ def wiki_home(environ, start_response):
     except NoBagError:
         raise HTTP404('wiki not found')
 
-    user = User(current_user)
-    try:
-        user = store.get(user)
-    except NoUserError:
-        pass
-    bag.policy.allows({ 'name': user.usersign, 'roles': user.roles }, 'read')
+    bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
 
     return _render_template(environ, start_response, 'layout.html')
 
