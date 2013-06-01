@@ -12,6 +12,7 @@ from pytest import raises
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
+from tiddlyweb.model.policy import Policy
 from tiddlyweb.store import NoTiddlerError, NoBagError
 from tiddlyweb.config import config as CONFIG
 from tiddlyweb.web.serve import load_app
@@ -27,9 +28,23 @@ def setup_module(module):
     _initialize_app(TMPDIR)
 
     module.STORE = get_store(CONFIG)
+
     user = User('admin')
     user.set_password('secret')
     STORE.put(user)
+
+    bag = Bag('alpha')
+    bag.policy = Policy(read=['admin'], write=['admin'], create=['admin'],
+        delete=['admin'], manage=['admin'])
+    STORE.put(bag)
+
+    bag = Bag('bravo')
+    STORE.put(bag)
+
+    bag = Bag('charlie')
+    bag.policy = Policy(read=['nobody'], write=['nobody'], create=['nobody'],
+        delete=['nobody'], manage=['nobody'])
+    STORE.put(bag)
 
 
 def teardown_module(module):
@@ -50,12 +65,15 @@ def test_root():
     assert response['location'] == '/~'
 
 
-def test_home():
+def test_user_home():
     response, content = _req('GET', '/~')
     assert response.status == 401
 
     response, content = _req('GET', '/~', headers={ 'Cookie': ADMIN_COOKIE })
     assert response.status == 200
+    assert '<a href="/alpha">alpha</a>' in content
+    assert '<a href="/bravo">bravo</a>' in content
+    assert not "charlie" in content
 
 
 def test_user_registration():

@@ -6,9 +6,11 @@
 
 <h3>Your Wikis</h3>
 <ul>
-    {% for wiki in wikis %}
-    <li>{{ wiki }}</li>
-    {% endfor %}
+	{% for wiki in wikis %}
+	<li>
+		<a href="{{ wiki['uri'] }}">{{ wiki['name'] }}</a>
+	</li>
+	{% endfor %}
 <ul>
 
 

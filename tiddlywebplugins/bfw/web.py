@@ -3,7 +3,7 @@ from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
-from tiddlyweb.model.policy import Policy, UserRequiredError
+from tiddlyweb.model.policy import Policy, UserRequiredError, ForbiddenError
 from tiddlyweb.store import NoBagError, NoUserError
 from tiddlyweb.web.util import get_route_value, make_cookie
 
@@ -46,8 +46,19 @@ def user_home(environ, start_response):
     if current_user == 'GUEST':
         raise HTTP401('unauthorized')
 
+    store = environ['tiddlyweb.store']
+    wikis = []
+    for bag in store.list_bags():
+        try:
+            bag = store.get(bag) # XXX: this should not be necessary!?
+            bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
+            uri = _uri(environ, bag.name)
+            wikis.append({ 'name': bag.name, 'uri': uri })
+        except ForbiddenError, exc:
+            pass
+
     return _render_template(environ, start_response, 'user_home.html',
-            user=current_user)
+            user=current_user, wikis=wikis)
 
 
 def wiki_home(environ, start_response):
@@ -173,3 +184,8 @@ def _ensure_bag_exists(bag_name, store):
         raise HTTP404('wiki not found')
 
     return bag
+
+
+def _uri(environ, *segments):
+    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
+    return '/'.join([server_prefix] + list(segments)) # TODO: encode segments
