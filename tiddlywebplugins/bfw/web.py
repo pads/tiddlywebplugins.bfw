@@ -100,7 +100,7 @@ def create_wiki(environ, start_response):
 
     store.put(bag)
 
-    wiki_uri = _uri(environ, wiki_name) # XXX: should include host!?
+    wiki_uri = _uri(environ, wiki_name).encode('UTF-8') # XXX: should include host!?
     start_response('303 See Other', [('Location', wiki_uri)])
     return ['']
 
@@ -119,8 +119,7 @@ def create_page(environ, start_response):
     tiddler = Tiddler(title, bag.name)
     store.put(tiddler)
 
-    page_uri = _uri(environ, wiki_name, title) # XXX: should include host!?
-
+    page_uri = _uri(environ, wiki_name, title).encode('UTF-8') # XXX: should include host!?
     start_response('303 See Other', [('Location', page_uri)])
     return ['']
 
@@ -151,7 +150,7 @@ def register_user(environ, start_response):
             expires=environ['tiddlyweb.config'].get('cookie_age', None))
 
     start_response('303 See Other',
-            [('Set-Cookie', cookie), ('Location', root_uri)])
+            [('Set-Cookie', cookie), ('Location', root_uri.encode('UTF-8'))])
     return ['']
 
 
