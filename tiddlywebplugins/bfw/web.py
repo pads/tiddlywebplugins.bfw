@@ -121,6 +121,7 @@ def create_page(environ, start_response):
     bag.policy.allows(environ['tiddlyweb.usersign'], 'create')
 
     tiddler = Tiddler(title, bag.name)
+    tiddler.text = text
     store.put(tiddler) # XXX: overwrites existing tiddlers
 
     page_uri = _uri(environ, wiki_name, title).encode('UTF-8') # XXX: should include host!?
