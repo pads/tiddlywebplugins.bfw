@@ -56,8 +56,12 @@ def user_home(environ, start_response):
         except ForbiddenError, exc:
             pass
 
+    uris = {
+        'create_wiki': _uri(environ, 'wikis'),
+        'create_page': _uri(environ, 'pages')
+    }
     return _render_template(environ, start_response, 'user_home.html',
-            user=current_user, wikis=wikis)
+            user=current_user, wikis=wikis, uris=uris)
 
 
 def wiki_home(environ, start_response):
@@ -117,7 +121,7 @@ def create_page(environ, start_response):
     bag.policy.allows(environ['tiddlyweb.usersign'], 'create')
 
     tiddler = Tiddler(title, bag.name)
-    store.put(tiddler)
+    store.put(tiddler) # XXX: overwrites existing tiddlers
 
     page_uri = _uri(environ, wiki_name, title).encode('UTF-8') # XXX: should include host!?
     start_response('303 See Other', [('Location', page_uri)])
