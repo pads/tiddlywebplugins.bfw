@@ -9,9 +9,10 @@ from urllib import urlencode
 from wsgi_intercept import httplib2_intercept
 from pytest import raises
 
+from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
-from tiddlyweb.store import NoBagError
+from tiddlyweb.store import NoTiddlerError, NoBagError
 from tiddlyweb.config import config as CONFIG
 from tiddlyweb.web.serve import load_app
 from tiddlywebplugins.utils import get_store
@@ -149,6 +150,30 @@ def test_wiki_creation():
     # TODO: test special characters in names
 
 
+def test_page_creation():
+    default_headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
+    data = {
+        'wiki': 'foo',
+        'title': 'Lipsum',
+        'text': 'lorem ipsum\ndolor sit amet'
+    }
+
+    response, content = _req('POST', '/pages')
+    assert response.status == 415
+
+    response, content = _req('POST', '/pages', urlencode(data),
+            headers=default_headers)
+    assert response.status == 403
+    assert not _tiddler_exists('Lipsum', 'foo')
+
+    headers = { 'Cookie': ADMIN_COOKIE }
+    headers.update(default_headers)
+    response, content = _req('POST', '/pages', urlencode(data), headers=headers)
+    assert response.status == 303
+    assert response['location'] == '/foo/Lipsum'
+    assert _tiddler_exists('Lipsum', 'foo')
+
+
 def test_errors():
     response, content = _req('GET', '/N/A')
     assert response.status == 404
@@ -217,6 +242,15 @@ def _req(method, uri, body=None, **kwargs):
     http.follow_redirects = False
     return http.request('http://example.org:8001%s' % uri, method=method,
             body=body, **kwargs)
+
+
+def _tiddler_exists(title, bag_name):
+    tiddler = Tiddler(title, bag_name)
+    try:
+        tiddler = STORE.get(tiddler)
+        return True
+    except NoTiddlerError:
+        return False
 
 
 def _bag_exists(bag_name):

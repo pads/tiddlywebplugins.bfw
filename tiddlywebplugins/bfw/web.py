@@ -1,5 +1,6 @@
 from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
+from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
 from tiddlyweb.model.policy import Policy, UserRequiredError
@@ -38,12 +39,8 @@ def wiki_home(environ, start_response):
     current_user = environ['tiddlyweb.usersign']['name']
     wiki_name = get_route_value(environ, 'wiki_name')
 
-    bag = Bag(wiki_name)
     store = environ['tiddlyweb.store']
-    try:
-        bag = store.get(bag)
-    except NoBagError:
-        raise HTTP404('wiki not found')
+    bag = _ensure_bag_exists(wiki_name, store)
 
     bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
 
@@ -62,7 +59,8 @@ def create_wiki(environ, start_response):
     store = environ['tiddlyweb.store']
 
     # check reserved terms
-    if wiki_name in ['bags', 'recipes', 'wikis', '~', 'register', 'logout']: # XXX: too manual, hard to keep in sync
+    blacklist = ['bags', 'recipes', 'wikis', 'pages', '~', 'register', 'logout'] # XXX: too manual, hard to keep in sync
+    if wiki_name in blacklist:
         raise HTTP409('wiki name unavailable')
 
     bag = Bag(wiki_name)
@@ -72,8 +70,9 @@ def create_wiki(environ, start_response):
     except NoBagError:
         pass
 
-    if private:
-        bag.policy = Policy(read=[current_user])
+    read_constraint = [current_user] if private else None
+    bag.policy = Policy(read=read_constraint , write=[current_user],
+            create=[current_user], delete=[current_user], manage=[current_user]) # XXX: too limiting!?
 
     store.put(bag)
 
@@ -81,6 +80,28 @@ def create_wiki(environ, start_response):
     wiki_uri = '%s/%s' % (server_prefix, wiki_name) # XXX: should include host!?
 
     start_response('303 See Other', [('Location', wiki_uri)])
+    return ['']
+
+
+def create_page(environ, start_response):
+    _ensure_form_submission(environ)
+
+    wiki_name = environ['tiddlyweb.query']['wiki'][0]
+    title = environ['tiddlyweb.query']['title'][0] # TODO: validate
+    text = environ['tiddlyweb.query']['text'][0]
+
+    store = environ['tiddlyweb.store']
+    bag = _ensure_bag_exists(wiki_name, store)
+
+    bag.policy.allows(environ['tiddlyweb.usersign'], 'create')
+
+    tiddler = Tiddler(title, bag.name)
+    store.put(tiddler)
+
+    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
+    page_uri = '%s/%s/%s' % (server_prefix, wiki_name, title) # XXX: should include host!?
+
+    start_response('303 See Other', [('Location', page_uri)])
     return ['']
 
 
@@ -130,6 +151,16 @@ def _render_template(environ, start_response, name, status='200 OK', headers={},
         headers['Content-Type'] = 'text/html; charset=UTF-8'
     start_response(status, headers.items())
     return template.generate(**data)
+
+
+def _ensure_bag_exists(bag_name, store):
+    bag = Bag(bag_name)
+    try:
+        bag = store.get(bag)
+    except NoBagError:
+        raise HTTP404('wiki not found')
+
+    return bag
 
 
 def _ensure_form_submission(environ): # TODO: turn into decorator
