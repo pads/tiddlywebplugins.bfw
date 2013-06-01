@@ -11,6 +11,21 @@ from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
 
 
+def ensure_form_submission(fn): # TODO: move elsewhere
+    """
+    decorator to ensure the request was a form submission
+    """
+
+    def wrapper(environ, start_response):
+        content_type = environ.get('CONTENT_TYPE', '')
+        if not content_type.startswith('application/x-www-form-urlencoded'):
+            raise HTTP415('unsupported content type')
+
+        return fn(environ, start_response)
+
+    return wrapper
+
+
 def frontpage(environ, start_response):
     current_user = environ['tiddlyweb.usersign']['name']
     server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
@@ -47,9 +62,8 @@ def wiki_home(environ, start_response):
     return _render_template(environ, start_response, 'layout.html')
 
 
+@ensure_form_submission
 def create_wiki(environ, start_response):
-    _ensure_form_submission(environ)
-
     current_user = environ['tiddlyweb.usersign']['name']
     if current_user == 'GUEST':
         raise HTTP401('unauthorized')
@@ -71,7 +85,7 @@ def create_wiki(environ, start_response):
         pass
 
     read_constraint = [current_user] if private else None
-    bag.policy = Policy(read=read_constraint , write=[current_user],
+    bag.policy = Policy(read=read_constraint, write=[current_user],
             create=[current_user], delete=[current_user], manage=[current_user]) # XXX: too limiting!?
 
     store.put(bag)
@@ -83,9 +97,8 @@ def create_wiki(environ, start_response):
     return ['']
 
 
+@ensure_form_submission
 def create_page(environ, start_response):
-    _ensure_form_submission(environ)
-
     wiki_name = environ['tiddlyweb.query']['wiki'][0]
     title = environ['tiddlyweb.query']['title'][0] # TODO: validate
     text = environ['tiddlyweb.query']['text'][0]
@@ -105,9 +118,8 @@ def create_page(environ, start_response):
     return ['']
 
 
+@ensure_form_submission
 def register_user(environ, start_response):
-    _ensure_form_submission(environ)
-
     username, password, confirmation = [environ['tiddlyweb.query'][param][0] for
             param in ('username', 'password', 'password_confirmation')]
 
@@ -161,9 +173,3 @@ def _ensure_bag_exists(bag_name, store):
         raise HTTP404('wiki not found')
 
     return bag
-
-
-def _ensure_form_submission(environ): # TODO: turn into decorator
-    content_type = environ.get('CONTENT_TYPE', '')
-    if not content_type.startswith('application/x-www-form-urlencoded'):
-        raise HTTP415('unsupported content type')
