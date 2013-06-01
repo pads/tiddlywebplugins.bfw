@@ -28,14 +28,13 @@ def ensure_form_submission(fn): # TODO: move elsewhere
 
 def frontpage(environ, start_response):
     current_user = environ['tiddlyweb.usersign']['name']
-    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
 
     if current_user != 'GUEST': # auth'd
-        raise HTTP302('%s/~' % server_prefix)
+        raise HTTP302(_uri(environ, '~'))
     else: # unauth'd
         uris = {
-            'register': '%s/register' % server_prefix,
-            'login': '%s/challenge' % server_prefix
+            'register': _uri(environ, 'register'),
+            'login': _uri(environ, 'challenge')
         }
         return _render_template(environ, start_response, 'frontpage.html',
                 uris=uris)
@@ -101,9 +100,7 @@ def create_wiki(environ, start_response):
 
     store.put(bag)
 
-    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    wiki_uri = '%s/%s' % (server_prefix, wiki_name) # XXX: should include host!?
-
+    wiki_uri = _uri(environ, wiki_name) # XXX: should include host!?
     start_response('303 See Other', [('Location', wiki_uri)])
     return ['']
 
@@ -122,8 +119,7 @@ def create_page(environ, start_response):
     tiddler = Tiddler(title, bag.name)
     store.put(tiddler)
 
-    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    page_uri = '%s/%s/%s' % (server_prefix, wiki_name, title) # XXX: should include host!?
+    page_uri = _uri(environ, wiki_name, title) # XXX: should include host!?
 
     start_response('303 See Other', [('Location', page_uri)])
     return ['']
@@ -148,8 +144,7 @@ def register_user(environ, start_response):
     user.set_password(password)
     store.put(user)
 
-    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    root_uri = '%s/' % server_prefix
+    root_uri = _uri(environ, '')
 
     cookie = make_cookie('tiddlyweb_user', user.usersign, path=root_uri,
             mac_key=environ['tiddlyweb.config']['secret'],
@@ -161,9 +156,7 @@ def register_user(environ, start_response):
 
 
 def logout(environ, start_response):
-    server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-
-    environ['tiddlyweb.query']['tiddlyweb_redirect'] = ['%s/' % server_prefix]
+    environ['tiddlyweb.query']['tiddlyweb_redirect'] = [_uri(environ, '')]
     return logout_handler(environ, start_response)
 
 
