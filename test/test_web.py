@@ -133,9 +133,20 @@ def test_wiki_creation():
     response, content = _req('POST', '/wikis', urlencode(data), headers=headers)
     assert response.status == 409
 
-    # TODO:
-    # * test non-private wiki results
-    # * test special characters in names
+    assert not _bag_exists('bar')
+
+    data = { 'wiki': 'bar' }
+    headers = { 'Cookie': ADMIN_COOKIE }
+    headers.update(default_headers)
+    response, content = _req('POST', '/wikis', urlencode(data), headers=headers)
+    assert response.status == 303
+    assert response['location'] == '/bar'
+    assert _bag_exists('bar')
+
+    response, content = _req('GET', '/bar')
+    assert response.status == 200
+
+    # TODO: test special characters in names
 
 
 def test_errors():

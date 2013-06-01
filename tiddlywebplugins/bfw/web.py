@@ -58,7 +58,7 @@ def create_wiki(environ, start_response):
         raise HTTP401('unauthorized')
 
     wiki_name = environ['tiddlyweb.query']['wiki'][0] # TODO: validate
-    private = environ['tiddlyweb.query']['private'][0] == '1'
+    private = environ['tiddlyweb.query'].get('private', [''])[0] == '1'
     store = environ['tiddlyweb.store']
 
     # check reserved terms
