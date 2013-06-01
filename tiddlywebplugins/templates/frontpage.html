@@ -4,21 +4,16 @@
 
 <a href="{{ uris['login'] }}">Log in</a>
 
-<h3>Register</h3>
-<form action="{{ uris['register'] }}" method="post">
-	<label>
-		username:
-		<input name="username">
-	</label>
-	<label>
-		password:
-		<input type="password" name="password">
-	</label>
-	<label>
-		confirm password:
-		<input type="password" name="password_confirmation">
-	</label>
-	<input type="submit">
+<form action="{{ uris['register'] }}" method="post" class="pure-form">
+	<fieldset>
+		<legend>Register</legend>
+
+		<input name="username" placeholder="username">
+		<input type="password" name="password" placeholder="password">
+		<input type="password" name="password_confirmation" placeholder="confirm password">
+
+		<input type="submit" class="pure-button" value="Register">
+	<fieldset>
 </form>
 
 {% endblock %}

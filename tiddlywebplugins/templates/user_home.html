@@ -15,38 +15,38 @@
 </ul>
 {% endif %}
 
-<h3>Create Wiki</h3>
-<form action="{{ uris['create_wiki'] }}" method="post">
-	<label>
-		wiki name:
-		<input name="wiki">
-	</label>
-	<label>
-		private:
-		<input type="checkbox" name="private" value="1">
-	</label>
-	<input type="submit">
+<form action="{{ uris['create_wiki'] }}" method="post" class="pure-form">
+	<fieldset>
+		<legend>Create Wiki</legend>
+
+		<input name="wiki" placeholder="wiki name">
+		<label>
+			<input type="checkbox" name="private" value="1">
+			private
+		</label>
+
+		<input type="submit" value="Create Wiki">
+	</fieldset>
 </form>
 
 {% if wikis %}
-<h3>Create Page</h3>
-<form action="{{ uris['create_page'] }}" method="post">
-	<label>
-		wiki:
-		<select name="wiki">
-			{% for wiki in wikis %}
-			<option value="{{ wiki['name'] }}">{{ wiki['name'] }}</option>
-			{% endfor %}
-		</select>
-	</label>
-	<label>
-		title:
-		<input name="title">
-	</label>
-	<label>
+<form action="{{ uris['create_page'] }}" method="post" class="pure-form">
+	<fieldset>
+		<legend>Create Page</legend>
+
+		<label>
+			wiki
+			<select name="wiki">
+				{% for wiki in wikis %}
+				<option value="{{ wiki['name'] }}">{{ wiki['name'] }}</option>
+				{% endfor %}
+			</select>
+		</label>
+		<input name="title" placeholder="title">
 		<textarea name="text"></textarea>
-	</label>
-	<input type="submit">
+
+		<input type="submit" value="Create Page">
+	</fieldset>
 </form>
 {% endif %}
 
