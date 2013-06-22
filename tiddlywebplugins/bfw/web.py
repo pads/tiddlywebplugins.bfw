@@ -129,6 +129,7 @@ def create_page(environ, start_response):
     bag.policy.allows(environ['tiddlyweb.usersign'], 'create')
 
     tiddler = Tiddler(title, bag.name)
+    tiddler.type = 'text/x-markdown'
     tiddler.text = text
     store.put(tiddler) # XXX: overwrites existing tiddlers
 

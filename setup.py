@@ -21,7 +21,8 @@ META = {
     'include_package_data': False,
     'zip_safe': False,
     'install_requires': ['tiddlyweb', 'tiddlywebplugins.utils',
-            'tiddlywebplugins.logout', 'tiddlywebplugins.templates'],
+            'tiddlywebplugins.logout', 'tiddlywebplugins.templates',
+            'tiddlywebplugins.markdown'],
     'extras_require': {
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
         'coverage': ['figleaf', 'coverage']

@@ -13,6 +13,7 @@ def init(config):
         return
 
     config['server_response_filters'].insert(0, middleware.FriendlyError) # XXX: position arbitrary!?
+
     selector.status404 = _error_handler('404 Not Found', 'not found')
     selector.status405 = _error_handler('405 Method Not Allowed',
             'method not allowed')
@@ -25,6 +26,8 @@ def init(config):
     selector.add('/logout', POST=web.logout)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
+
+    config['wikitext.type_render_map']['text/x-markdown'] = 'tiddlywebplugins.markdown'
 
 
 def _error_handler(status, message):
