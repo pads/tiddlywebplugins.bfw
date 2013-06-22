@@ -35,7 +35,7 @@ def setup_module(module):
 
     bag = Bag('alpha')
     bag.policy = Policy(read=['admin'], write=['admin'], create=['admin'],
-        delete=['admin'], manage=['admin'])
+            delete=['admin'], manage=['admin'])
     STORE.put(bag)
 
     bag = Bag('bravo')
@@ -43,7 +43,7 @@ def setup_module(module):
 
     bag = Bag('charlie')
     bag.policy = Policy(read=['nobody'], write=['nobody'], create=['nobody'],
-        delete=['nobody'], manage=['nobody'])
+            delete=['nobody'], manage=['nobody'])
     STORE.put(bag)
 
 
@@ -56,13 +56,13 @@ def test_root():
     assert response.status == 200
     assert response['content-type'] == 'text/html; charset=UTF-8'
 
-    assert '<a href="/challenge?tiddlyweb_redirect=%2F%7E">Log in</a>' in content
+    assert '<a href="/challenge?tiddlyweb_redirect=%2F~">Log in</a>' in content
     assert 'Register' in content
 
     response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
 
     assert response.status == 302
-    assert response['location'] == '/%7E'
+    assert response['location'] == '/~'
 
 
 def test_user_home():
@@ -175,7 +175,7 @@ def test_page_creation():
     data = {
         'wiki': 'foo',
         'title': 'Lipsum',
-        'text': 'lorem ipsum\ndolor sit amet'
+        'text': 'lorem ipsum\ndolor *sit* amet'
     }
 
     response, content = _req('POST', '/pages')
@@ -192,6 +192,10 @@ def test_page_creation():
     assert response.status == 303
     assert response['location'] == '/foo/Lipsum'
     assert _tiddler_exists('Lipsum', 'foo')
+
+    response, content = _req('GET', '/foo/Lipsum', headers=headers)
+    assert response.status == 200
+    assert '<pre>\nlorem ipsum\ndolor *sit* amet</pre>' in content
 
 
 def test_errors():

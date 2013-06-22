@@ -1,13 +1,12 @@
-from urllib import quote
-
 from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
 from tiddlyweb.model.policy import Policy, UserRequiredError, ForbiddenError
+from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.store import NoTiddlerError, NoBagError, NoUserError
-from tiddlyweb.web.util import get_route_value, make_cookie
+from tiddlyweb.web.util import get_route_value, make_cookie, encode_name
 
 from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
@@ -82,7 +81,7 @@ def wiki_page(environ, start_response):
         raise HTTP404('page not found')
 
     start_response('200 OK', [('Content-Type', 'text/plain; charset=UTF-8')])
-    return [tiddler.text]
+    return [render_wikitext(tiddler, environ)]
 
 
 @ensure_form_submission
@@ -206,14 +205,11 @@ def _ensure_bag_exists(bag_name, store):
 
 def _uri(environ, *segments, **query_params):
     server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    uri = '/'.join([server_prefix] + [_encode(segment) for segment in segments])
+    uri = '/'.join([server_prefix] +
+            [encode_name(segment) for segment in segments])
 
     if query_params:
-        uri += '?%s' % ';'.join('%s=%s' % (_encode(key), _encode(value))
+        uri += '?%s' % ';'.join('%s=%s' % (encode_name(key), encode_name(value))
                 for key, value in query_params.items())
 
     return uri
-
-
-def _encode(uri_component):
-    return quote(uri_component, safe='')
