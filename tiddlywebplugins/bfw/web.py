@@ -1,3 +1,5 @@
+from urllib import quote
+
 from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
 from tiddlyweb.model.tiddler import Tiddler
@@ -34,7 +36,7 @@ def frontpage(environ, start_response):
     else: # unauth'd
         uris = {
             'register': _uri(environ, 'register'),
-            'login': _uri(environ, 'challenge')
+            'login': _uri(environ, 'challenge', tiddlyweb_redirect='/~')
         }
         return _render_template(environ, start_response, 'frontpage.html',
                 uris=uris)
@@ -183,6 +185,16 @@ def _ensure_bag_exists(bag_name, store):
     return bag
 
 
-def _uri(environ, *segments):
+def _uri(environ, *segments, **query_params):
     server_prefix = environ['tiddlyweb.config'].get('server_prefix', '')
-    return '/'.join([server_prefix] + list(segments)) # TODO: encode segments
+    uri = '/'.join([server_prefix] + [_encode(segment) for segment in segments])
+
+    if query_params:
+        uri += '?%s' % ';'.join('%s=%s' % (_encode(key), _encode(value))
+                for key, value in query_params.items())
+
+    return uri
+
+
+def _encode(uri_component):
+    return quote(uri_component, safe='')

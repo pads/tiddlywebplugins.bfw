@@ -56,13 +56,13 @@ def test_root():
     assert response.status == 200
     assert response['content-type'] == 'text/html; charset=UTF-8'
 
-    assert '<a href="/challenge">Log in</a>' in content
+    assert '<a href="/challenge?tiddlyweb_redirect=%2F%7E">Log in</a>' in content
     assert 'Register' in content
 
     response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
 
     assert response.status == 302
-    assert response['location'] == '/~'
+    assert response['location'] == '/%7E'
 
 
 def test_user_home():
