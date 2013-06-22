@@ -24,6 +24,7 @@ def init(config):
     selector.add('/pages', POST=web.create_page) # XXX: bad URI?
     selector.add('/logout', POST=web.logout)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
+    selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
 
 
 def _error_handler(status, message):

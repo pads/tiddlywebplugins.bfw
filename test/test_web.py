@@ -134,7 +134,8 @@ def test_wiki_creation():
     assert _bag_exists('foo')
 
     response, content = _req('GET', '/foo', headers={ 'Cookie': ADMIN_COOKIE })
-    assert response.status == 200
+    assert response.status == 302
+    assert response['location'] == '/foo/index'
 
     response, content = _req('GET', '/bar')
     assert response.status == 404
@@ -163,7 +164,8 @@ def test_wiki_creation():
     assert _bag_exists('bar')
 
     response, content = _req('GET', '/bar')
-    assert response.status == 200
+    assert response.status == 302
+    assert response['location'] == '/bar/index'
 
     # TODO: test special characters in names
 

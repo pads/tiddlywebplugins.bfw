@@ -6,7 +6,7 @@ from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.model.bag import Bag
 from tiddlyweb.model.user import User
 from tiddlyweb.model.policy import Policy, UserRequiredError, ForbiddenError
-from tiddlyweb.store import NoBagError, NoUserError
+from tiddlyweb.store import NoTiddlerError, NoBagError, NoUserError
 from tiddlyweb.web.util import get_route_value, make_cookie
 
 from tiddlywebplugins.logout import logout as logout_handler
@@ -67,15 +67,22 @@ def user_home(environ, start_response):
 
 
 def wiki_home(environ, start_response):
-    current_user = environ['tiddlyweb.usersign']['name']
-    wiki_name = get_route_value(environ, 'wiki_name')
+    wiki_name, _ = _ensure_wiki_readable(environ)
+    raise HTTP302(_uri(environ, wiki_name, 'index'))
 
-    store = environ['tiddlyweb.store']
-    bag = _ensure_bag_exists(wiki_name, store)
 
-    bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
+def wiki_page(environ, start_response):
+    wiki_name, bag = _ensure_wiki_readable(environ)
 
-    return _render_template(environ, start_response, 'layout.html')
+    page_name = get_route_value(environ, 'page_name')
+    tiddler = Tiddler(page_name, bag.name)
+    try:
+        tiddler = bag.store.get(tiddler)
+    except NoTiddlerError:
+        raise HTTP404('page not found')
+
+    start_response('200 OK', [('Content-Type', 'text/plain; charset=UTF-8')])
+    return [tiddler.text]
 
 
 @ensure_form_submission
@@ -173,6 +180,18 @@ def _render_template(environ, start_response, name, status='200 OK', headers={},
         headers['Content-Type'] = 'text/html; charset=UTF-8'
     start_response(status, headers.items())
     return template.generate(**data)
+
+
+def _ensure_wiki_readable(environ):
+    current_user = environ['tiddlyweb.usersign']['name']
+    wiki_name = get_route_value(environ, 'wiki_name')
+
+    store = environ['tiddlyweb.store']
+    bag = _ensure_bag_exists(wiki_name, store)
+
+    bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
+
+    return wiki_name, bag
 
 
 def _ensure_bag_exists(bag_name, store):
