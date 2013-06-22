@@ -195,6 +195,7 @@ def test_page_creation():
 
     response, content = _req('GET', '/foo/Lipsum', headers=headers)
     assert response.status == 200
+    assert response['content-type'] == 'text/html; charset=UTF-8'
     assert '<pre>\nlorem ipsum\ndolor *sit* amet</pre>' in content
 
 

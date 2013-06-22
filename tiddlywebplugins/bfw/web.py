@@ -80,8 +80,8 @@ def wiki_page(environ, start_response):
     except NoTiddlerError:
         raise HTTP404('page not found')
 
-    start_response('200 OK', [('Content-Type', 'text/plain; charset=UTF-8')])
-    return [render_wikitext(tiddler, environ)]
+    return _render_template(environ, start_response, 'wiki_page.html',
+            contents=render_wikitext(tiddler, environ))
 
 
 @ensure_form_submission
