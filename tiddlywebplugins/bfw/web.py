@@ -80,7 +80,10 @@ def wiki_page(environ, start_response):
     except NoTiddlerError:
         raise HTTP404('page not found')
 
+    title = wiki_name if page_name == 'index' else page_name # XXX: undesirable?
+
     return _render_template(environ, start_response, 'wiki_page.html',
+            title=title, page_title=page_name,
             contents=render_wikitext(tiddler, environ))
 
 
