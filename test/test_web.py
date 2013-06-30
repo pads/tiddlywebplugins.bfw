@@ -46,6 +46,11 @@ def setup_module(module):
             delete=['nobody'], manage=['nobody'])
     STORE.put(bag)
 
+    tiddler = Tiddler('index', 'bravo')
+    tiddler.text = 'lorem ipsum\ndolor *sit* amet'
+    tiddler.type = 'text/x-markdown'
+    STORE.put(tiddler)
+
 
 def teardown_module(module):
     shutil.rmtree(TMPDIR)
@@ -73,7 +78,27 @@ def test_user_home():
     assert response.status == 200
     assert '<a href="/alpha">alpha</a>' in content
     assert '<a href="/bravo">bravo</a>' in content
-    assert not "charlie" in content
+    assert not 'charlie' in content
+
+
+def test_page_editor():
+    response, content = _req('GET', '/editor?page=alpha%2FHelloWorld')
+    assert response.status == 302
+    assert response['location'].endswith('/challenge?tiddlyweb_redirect=%s' %
+            '%2Feditor%3Fpage%3Dalpha%252FHelloWorld')
+
+    response, content = _req('GET', '/editor?page=bravo%2FHelloWorld')
+    assert response.status == 200
+    assert '<form ' in content
+    assert 'action="/editor"' in content
+    assert 'method="post"' in content
+    assert '<title>bravo/HelloWorld</title>' in content
+    assert '<h1>HelloWorld</h1>' in content
+    assert '<textarea></textarea>' in content
+
+    response, content = _req('GET', '/editor?page=bravo%2Findex')
+    assert response.status == 200
+    assert '<textarea>lorem ipsum\ndolor *sit* amet</textarea>' in content
 
 
 def test_user_registration():

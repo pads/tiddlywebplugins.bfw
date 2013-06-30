@@ -87,6 +87,23 @@ def wiki_page(environ, start_response):
             contents=render_wikitext(tiddler, environ))
 
 
+def editor(environ, start_response):
+    page = environ['tiddlyweb.query']['page'][0] # TODO: guard against missing parameter
+    wiki_name, page_name = page.split('/') # TODO: validate
+
+    _, bag = _ensure_wiki_readable(environ, wiki_name)
+
+    tiddler = Tiddler(page_name, bag.name)
+    try:
+        tiddler = bag.store.get(tiddler)
+    except NoTiddlerError:
+        pass
+
+    return _render_template(environ, start_response, 'editor.html',
+            title=page, page_title=page_name, target=_uri(environ, 'editor'),
+            contents=tiddler.text)
+
+
 @ensure_form_submission
 def create_wiki(environ, start_response):
     current_user = environ['tiddlyweb.usersign']['name']
@@ -185,9 +202,10 @@ def _render_template(environ, start_response, name, status='200 OK', headers={},
     return template.generate(**data)
 
 
-def _ensure_wiki_readable(environ):
+def _ensure_wiki_readable(environ, wiki_name=None):
     current_user = environ['tiddlyweb.usersign']['name']
-    wiki_name = get_route_value(environ, 'wiki_name')
+    if not wiki_name: # XXX: bad API!?
+        wiki_name = get_route_value(environ, 'wiki_name')
 
     store = environ['tiddlyweb.store']
     bag = _ensure_bag_exists(wiki_name, store)

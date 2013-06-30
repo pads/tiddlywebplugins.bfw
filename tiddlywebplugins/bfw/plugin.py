@@ -23,6 +23,7 @@ def init(config):
     selector.add('/register', POST=web.register_user) # XXX: verb as URI
     selector.add('/wikis', POST=web.create_wiki) # XXX: bad URI?
     selector.add('/pages', POST=web.create_page) # XXX: bad URI?
+    selector.add('/editor', GET=web.editor) # XXX: bad URI?
     selector.add('/logout', POST=web.logout)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
