@@ -81,6 +81,22 @@ def test_user_home():
     assert not 'charlie' in content
 
 
+def test_wiki_page():
+    response, content = _req('GET', '/alpha/index')
+    assert response.status == 302
+    assert '/challenge?tiddlyweb_redirect=%2Falpha%2Findex' in response['location']
+    assert response['location'].endswith('/challenge?tiddlyweb_redirect=%s' %
+            '%2Falpha%2Findex')
+
+    response, content = _req('GET', '/bravo/index')
+    assert response.status == 200
+    assert '<p>lorem ipsum\ndolor <em>sit</em> amet</p>' in content
+
+    response, content = _req('GET', '/bravo/HelloWorld')
+    assert response.status == 302
+    assert response['location'] == '/editor?page=bravo%2FHelloWorld'
+
+
 def test_page_editor():
     response, content = _req('GET', '/editor?page=alpha%2FHelloWorld')
     assert response.status == 302
@@ -95,10 +111,12 @@ def test_page_editor():
     assert '<title>bravo/HelloWorld</title>' in content
     assert '<h1>HelloWorld</h1>' in content
     assert '<textarea></textarea>' in content
+    assert '"HelloWorld" does not exist yet in wiki "bravo"' in content
 
     response, content = _req('GET', '/editor?page=bravo%2Findex')
     assert response.status == 200
     assert '<textarea>lorem ipsum\ndolor *sit* amet</textarea>' in content
+    assert not 'does not exist yet' in content
 
 
 def test_user_registration():

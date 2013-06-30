@@ -78,7 +78,8 @@ def wiki_page(environ, start_response):
     try:
         tiddler = bag.store.get(tiddler)
     except NoTiddlerError:
-        raise HTTP404('page not found')
+        raise HTTP302(_uri(environ, 'editor',
+                page='%s/%s' % (wiki_name, page_name)))
 
     title = wiki_name if page_name == 'index' else page_name # XXX: undesirable?
 
@@ -90,18 +91,18 @@ def wiki_page(environ, start_response):
 def editor(environ, start_response):
     page = environ['tiddlyweb.query']['page'][0] # TODO: guard against missing parameter
     wiki_name, page_name = page.split('/') # TODO: validate
-
     _, bag = _ensure_wiki_readable(environ, wiki_name)
 
     tiddler = Tiddler(page_name, bag.name)
     try:
         tiddler = bag.store.get(tiddler)
+        msg = None
     except NoTiddlerError:
-        pass
+        msg = '"%s" does not exist yet in wiki "%s"' % (page_name, wiki_name)
 
     return _render_template(environ, start_response, 'editor.html',
             title=page, page_title=page_name, target=_uri(environ, 'editor'),
-            contents=tiddler.text)
+            contents=tiddler.text, notification=msg)
 
 
 @ensure_form_submission

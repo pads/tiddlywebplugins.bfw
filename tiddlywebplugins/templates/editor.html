@@ -2,6 +2,7 @@
 
 {% block body %}
 <h1>{{ page_title }}</h1>
+<p class="notification">{{ notification }}</p>
 <form action="{{ target }}" method="post">
 	<textarea>{{ contents }}</textarea>
 </form>
