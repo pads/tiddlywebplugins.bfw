@@ -100,8 +100,11 @@ def editor(environ, start_response):
     except NoTiddlerError:
         msg = '"%s" does not exist yet in wiki "%s"' % (page_name, wiki_name)
 
-    return _render_template(environ, start_response, 'editor.html',
-            title=page, page_title=page_name, target=_uri(environ, 'editor'),
+    uris = {
+        'put_page': _uri(environ, 'pages')
+    }
+    return _render_template(environ, start_response, 'editor.html', uris=uris,
+            title=page, wiki_name=wiki_name, page_title=page_name,
             contents=tiddler.text, notification=msg)
 
 
@@ -139,10 +142,11 @@ def create_wiki(environ, start_response):
 
 
 @ensure_form_submission
-def create_page(environ, start_response):
+def put_page(environ, start_response):
     wiki_name = environ['tiddlyweb.query']['wiki'][0]
     title = environ['tiddlyweb.query']['title'][0] # TODO: validate
     text = environ['tiddlyweb.query']['text'][0]
+    # TODO: parameter to only allow creation (for use in user home's quick creation UI)
 
     store = environ['tiddlyweb.store']
     bag = _ensure_bag_exists(wiki_name, store)
@@ -152,7 +156,7 @@ def create_page(environ, start_response):
     tiddler = Tiddler(title, bag.name)
     tiddler.type = 'text/x-markdown'
     tiddler.text = text
-    store.put(tiddler) # XXX: overwrites existing tiddlers
+    store.put(tiddler)
 
     page_uri = _uri(environ, wiki_name, title).encode('UTF-8') # XXX: should include host!?
     start_response('303 See Other', [('Location', page_uri)])

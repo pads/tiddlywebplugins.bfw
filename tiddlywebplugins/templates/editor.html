@@ -3,7 +3,9 @@
 {% block body %}
 <h1>{{ page_title }}</h1>
 <p class="notification">{{ notification }}</p>
-<form action="{{ target }}" method="post">
-	<textarea>{{ contents }}</textarea>
+<form action="{{ uris['put_page'] }}" method="post">
+	<input type="hidden" name="wiki" value="{{ wiki_name }}">
+	<input type="hidden" name="title" value="{{ page_title}}">
+	<textarea name="text">{{ contents }}</textarea>
 </form>
 {% endblock %}

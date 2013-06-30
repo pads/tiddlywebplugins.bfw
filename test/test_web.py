@@ -106,16 +106,18 @@ def test_page_editor():
     response, content = _req('GET', '/editor?page=bravo%2FHelloWorld')
     assert response.status == 200
     assert '<form ' in content
-    assert 'action="/editor"' in content
+    assert 'action="/pages"' in content
     assert 'method="post"' in content
     assert '<title>bravo/HelloWorld</title>' in content
     assert '<h1>HelloWorld</h1>' in content
-    assert '<textarea></textarea>' in content
+    assert '<input type="hidden" name="wiki" value="bravo">' in content
+    assert '<input type="hidden" name="title" value="HelloWorld">' in content
+    assert '<textarea name="text"></textarea>' in content
     assert '"HelloWorld" does not exist yet in wiki "bravo"' in content
 
     response, content = _req('GET', '/editor?page=bravo%2Findex')
     assert response.status == 200
-    assert '<textarea>lorem ipsum\ndolor *sit* amet</textarea>' in content
+    assert '<textarea name="text">lorem ipsum\ndolor *sit* amet</textarea>' in content
     assert not 'does not exist yet' in content
 
 
@@ -213,12 +215,12 @@ def test_wiki_creation():
     # TODO: test special characters in names
 
 
-def test_page_creation():
+def test_page_creation_and_modification():
     default_headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
     data = {
         'wiki': 'foo',
         'title': 'Lipsum',
-        'text': 'lorem ipsum\ndolor *sit* amet'
+        'text': 'lorem ipsum'
     }
 
     response, content = _req('POST', '/pages')
@@ -239,6 +241,14 @@ def test_page_creation():
     response, content = _req('GET', '/foo/Lipsum', headers=headers)
     assert response.status == 200
     assert response['content-type'] == 'text/html; charset=UTF-8'
+    assert '<p>lorem ipsum</p>' in content
+
+    data['text'] = 'lorem ipsum\ndolor *sit* amet'
+    response, content = _req('POST', '/pages', urlencode(data), headers=headers)
+    assert response.status == 303
+    assert response['location'] == '/foo/Lipsum'
+
+    response, content = _req('GET', '/foo/Lipsum', headers=headers)
     assert '<p>lorem ipsum\ndolor <em>sit</em> amet</p>' in content
 
 
