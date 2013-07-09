@@ -1,4 +1,4 @@
-.PHONY: server terminate test clean
+.PHONY: server terminate test clean remotes
 
 server: terminate
 	./reloader ./ '^.*\.py$$' twanager server & \
@@ -16,3 +16,7 @@ test: clean
 
 clean:
 	find . -name "*.pyc" | xargs rm || true
+	rm -r tiddlywebplugins/bfw/resources || true
+
+remotes:
+	twibuilder tiddlywebplugins.bfw

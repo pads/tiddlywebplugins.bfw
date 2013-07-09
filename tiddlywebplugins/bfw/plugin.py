@@ -2,11 +2,17 @@
 TiddlyWeb plugin initialization
 """
 
+from tiddlyweb.util import merge_config
+
 from tiddlywebplugins.utils import replace_handler
+
+from tiddlywebplugins.bfw.config import config as bfwconfig
+
 from . import web, middleware
 
 
 def init(config):
+    merge_config(config, bfwconfig)
     try:
         selector = config['selector']
     except KeyError: # twanager mode
