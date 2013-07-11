@@ -6,9 +6,8 @@ from tiddlyweb.util import merge_config
 
 from tiddlywebplugins.utils import replace_handler
 
-from tiddlywebplugins.bfw.config import config as bfwconfig
-
 from . import web, middleware
+from .config import config as bfwconfig
 
 
 def init(config):
