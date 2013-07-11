@@ -1,4 +1,4 @@
-.PHONY: server terminate test clean remotes
+.PHONY: server terminate dist test clean remotes
 
 server: terminate
 	./reloader ./ '^.*\.py$$' twanager server & \
@@ -11,12 +11,17 @@ terminate:
 			kill -TERM -$$pgid || true; done
 	rm .server.pid || true
 
+dist: test remotes
+	python setup.py sdist
+
 test: clean
 	py.test -s --tb=short test
 
 clean:
 	find . -name "*.pyc" | xargs rm || true
 	rm -r tiddlywebplugins/bfw/resources || true
+	rm -r dist || true
+	rm -r tiddlywebplugins.bfw.egg-info || true
 
 remotes:
 	twibuilder tiddlywebplugins.bfw
