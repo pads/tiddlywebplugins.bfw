@@ -2,12 +2,10 @@
 basic structure and contents of a BFW
 """
 
-store_contents = {}
-
 store_structure = {
     'bags': {
         'assets': {
-            'desc': 'Common assets',
+            'desc': 'common assets',
             'policy': {
                 'read': [],
                 'write': ['R:ADMIN'],
@@ -20,7 +18,9 @@ store_structure = {
     }
 }
 
-store_contents['assets'] = ['src/assets.recipe']
+store_contents = {
+    'assets': ['src/assets.recipe']
+}
 
 instance_config = {
     'system_plugins': ['tiddlywebplugins.bfw'],
