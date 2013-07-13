@@ -3,6 +3,9 @@ basic structure and contents of a BFW
 """
 
 store_structure = {
+    'users': {
+        'bfw': {} # not to be used as regular user
+    },
     'bags': {
         'assets': {
             'desc': 'common assets',
@@ -12,7 +15,7 @@ store_structure = {
                 'create': ['R:ADMIN'],
                 'delete': ['R:ADMIN'],
                 'manage': ['R:ADMIN'],
-                'owner': 'administrator',
+                'owner': 'bfw',
             }
         }
     }

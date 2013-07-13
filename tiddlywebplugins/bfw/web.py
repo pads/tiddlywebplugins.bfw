@@ -12,9 +12,6 @@ from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
 
 
-NON_WIKI_BAGS = ["assets"]
-
-
 def ensure_form_submission(fn): # TODO: move elsewhere
     """
     decorator to ensure the request was a form submission
@@ -52,11 +49,8 @@ def user_home(environ, start_response):
     store = environ['tiddlyweb.store']
     wikis = []
     for bag in store.list_bags():
-        if bag.name in NON_WIKI_BAGS: # XXX: special-casing
-            continue
         try:
-            bag = store.get(bag) # XXX: this should not be necessary!?
-            bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
+            _, bag = _ensure_wiki_readable(environ, bag.name)
             uri = _uri(environ, bag.name)
             wikis.append({ 'name': bag.name, 'uri': uri })
         except ForbiddenError, exc:
@@ -217,11 +211,11 @@ def _ensure_wiki_readable(environ, wiki_name=None):
     if not wiki_name: # XXX: bad API!?
         wiki_name = get_route_value(environ, 'wiki_name')
 
-    if wiki_name in NON_WIKI_BAGS: # XXX: does not belong here
-        raise HTTP404('wiki not found')
-
     store = environ['tiddlyweb.store']
     bag = _ensure_bag_exists(wiki_name, store)
+
+    if bag.policy.owner == 'bfw': # system bag -- XXX: does not belong here
+        raise HTTP404('wiki not found')
 
     bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
 
