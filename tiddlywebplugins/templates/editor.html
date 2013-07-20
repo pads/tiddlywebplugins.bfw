@@ -2,7 +2,9 @@
 
 {% block body %}
 <h1>{{ page_title }}</h1>
+{% if notification %}
 <p class="notification">{{ notification }}</p>
+{% endif %}
 <form action="{{ uris['put_page'] }}" method="post">
 	<input type="hidden" name="wiki" value="{{ wiki_name }}">
 	<input type="hidden" name="title" value="{{ page_title}}">
