@@ -17,7 +17,10 @@ from tiddlyweb.store import NoTiddlerError, NoBagError
 from tiddlyweb.config import config as CONFIG
 from tiddlyweb.web.serve import load_app
 from tiddlywebplugins.utils import get_store
+from tiddlywebplugins.imaker import spawn
 
+from tiddlywebplugins.bfw import init
+from tiddlywebplugins.bfw import instance
 
 ADMIN_COOKIE = 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
 
@@ -298,7 +301,13 @@ def test_errors():
     assert 'username unavailable' in content
 
 
+def test_special_bags():
+    assert _bag_exists('assets')
+
+
 def _initialize_app(tmpdir): # XXX: side-effecty
+    instance_dir = os.path.join(tmpdir, 'instance')
+
     CONFIG['server_host'] = {
         'scheme': 'http',
         'host': 'example.org',
@@ -307,9 +316,12 @@ def _initialize_app(tmpdir): # XXX: side-effecty
     # TODO: test with server_prefix
     CONFIG['system_plugins'].append('tiddlywebplugins.bfw')
     CONFIG['server_store'] = ['text', {
-        'store_root': os.path.join(tmpdir, 'store')
+        'store_root': os.path.join(instance_dir, 'store')
     }]
     CONFIG['secret'] = '0d67d5bbb6c002614efeaf296330fb43'
+
+    init(CONFIG) # required to merge configurations
+    spawn(instance_dir, CONFIG, instance)
 
     httplib2_intercept.install()
     wsgi_intercept.add_wsgi_intercept('example.org', 8001, load_app)

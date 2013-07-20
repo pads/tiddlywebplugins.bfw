@@ -1,4 +1,4 @@
-.PHONY: server terminate dist test clean remotes
+.PHONY: server terminate dist test qtest clean remotes
 
 server: terminate
 	./reloader ./ '^.*\.py$$' twanager server & \
@@ -11,10 +11,12 @@ terminate:
 			kill -TERM -$$pgid || true; done
 	rm .server.pid || true
 
-dist: test remotes
+dist: test
 	python setup.py sdist
 
-test: clean
+test: clean remotes qtest
+
+qtest:
 	py.test -s --tb=short test
 
 clean:

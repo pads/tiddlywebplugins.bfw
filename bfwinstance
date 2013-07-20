@@ -15,6 +15,7 @@ import os
 sys.path.insert(0, os.getcwd())
 
 from tiddlywebplugins.imaker import spawn
+
 from tiddlywebplugins.bfw import instance
 from tiddlywebplugins.bfw.config import config as init_config
 
