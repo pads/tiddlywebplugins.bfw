@@ -23,7 +23,8 @@ META = {
     'zip_safe': False,
     'install_requires': ['tiddlyweb', 'tiddlywebplugins.utils',
             'tiddlywebplugins.logout', 'tiddlywebplugins.templates',
-            'tiddlywebplugins.markdown', 'tiddlywebplugins.imaker'],
+            'tiddlywebplugins.markdown', 'tiddlywebplugins.imaker',
+            'tiddlywebplugins.diststore'],
     'extras_require': {
         'build': ['tiddlywebplugins.ibuilder'],
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],

@@ -12,6 +12,7 @@ from .config import config as bfwconfig
 
 def init(config):
     merge_config(config, bfwconfig)
+    wrap_store(config)
     try:
         selector = config['selector']
     except KeyError: # twanager mode
@@ -34,6 +35,22 @@ def init(config):
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
 
     config['wikitext.type_render_map']['text/x-markdown'] = 'tiddlywebplugins.markdown'
+
+
+def wrap_store(config):
+    """
+    wrap a diststore around the configured store for packaged contents (read
+    from `bfw.extra_stores`)
+    """
+    if config['server_store'][1].get('wrapped', None): # avoids infinite recurion -- XXX: shouldn't be necessary!?
+        return
+
+    original_store = config['server_store']
+    config['server_store'] = ['tiddlywebplugins.diststore', {
+        'main': original_store,
+        'extras': config['bfw.extra_stores'].items(),
+        'wrapped': True
+    }]
 
 
 def _error_handler(status, message):
