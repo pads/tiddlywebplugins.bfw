@@ -33,8 +33,6 @@ def init(config):
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
 
-    config['wikitext.type_render_map']['text/x-markdown'] = 'tiddlywebplugins.markdown'
-
 
 def _error_handler(status, message):
     return lambda environ, start_response: (middleware.
