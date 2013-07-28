@@ -1,3 +1,8 @@
+import os
+import mimetypes
+
+from pkg_resources import resource_filename, resource_stream
+
 from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
 from tiddlyweb.model.tiddler import Tiddler
@@ -195,6 +200,31 @@ def register_user(environ, start_response):
 def logout(environ, start_response):
     environ['tiddlyweb.query']['tiddlyweb_redirect'] = [_uri(environ, '')]
     return logout_handler(environ, start_response)
+
+
+def static(environ, start_response):
+    """
+    serve static assets
+
+    NB: ideally this is served by the web server rather than the application
+    """
+    filename = environ['wsgiorg.routing_args'][1]['filename']
+    if '../' in filename:
+        raise HTTP404('%s invalid' % filename)
+
+    filepath = os.path.join('assets', filename)
+    try:
+        fh = resource_stream(__package__, filepath)
+    except IOError:
+        raise HTTP404('%s not found' % filename)
+
+    filepath = resource_filename(__package__, filepath)
+    mime_type, encoding = mimetypes.guess_type(filepath)
+    if not mime_type:
+        mime_type = 'application/octet-stream'
+
+    start_response('200 OK', [('Content-Type', mime_type)])
+    return fh
 
 
 def _render_template(environ, start_response, name, status='200 OK', headers={},

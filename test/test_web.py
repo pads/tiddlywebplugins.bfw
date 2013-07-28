@@ -301,6 +301,24 @@ def test_errors():
     assert 'username unavailable' in content
 
 
+def test_static_assets():
+    response, content = _req('GET', '/static')
+    assert response.status == 404
+
+    response, content = _req('GET', '/static/../tiddlywebconfig.py')
+    assert response.status == 404
+
+    response, content = _req('GET', '/static/pure.css')
+    assert response.status == 200
+
+    response, content = _req('GET', '/static/favicon.ico')
+    assert response.status == 200
+
+    # TODO
+    #response, content = _req('GET', '/favicon.ico')
+    #assert response.status == 200
+
+
 def _initialize_app(tmpdir): # XXX: side-effecty
     instance_dir = os.path.join(tmpdir, 'instance')
 

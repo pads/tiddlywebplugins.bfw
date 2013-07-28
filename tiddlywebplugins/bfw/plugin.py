@@ -30,6 +30,7 @@ def init(config):
     selector.add('/pages', POST=web.put_page) # XXX: bad URI?
     selector.add('/editor', GET=web.editor) # XXX: bad URI?
     selector.add('/logout', POST=web.logout)
+    selector.add('/static/{filename:any}', GET=web.static)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
 
