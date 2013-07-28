@@ -23,7 +23,7 @@ remotes:
 	./assetr
 
 clean:
-	find . -name "*.pyc" | xargs rm || true
+	find . -name "*.pyc" -print0 | xargs -0 rm || true
 	rm -r dist || true
 	rm -r tiddlywebplugins.bfw.egg-info || true
 	# remove remote assets
