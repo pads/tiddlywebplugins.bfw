@@ -301,10 +301,6 @@ def test_errors():
     assert 'username unavailable' in content
 
 
-def test_special_bags():
-    assert _bag_exists('assets')
-
-
 def _initialize_app(tmpdir): # XXX: side-effecty
     instance_dir = os.path.join(tmpdir, 'instance')
 

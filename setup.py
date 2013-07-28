@@ -25,7 +25,6 @@ META = {
             'tiddlywebplugins.logout', 'tiddlywebplugins.templates',
             'tiddlywebplugins.markdown', 'tiddlywebplugins.imaker'],
     'extras_require': {
-        'build': ['tiddlywebplugins.ibuilder'],
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
         'coverage': ['figleaf', 'coverage']
     }

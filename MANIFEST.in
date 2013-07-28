@@ -1,4 +1,3 @@
 include Makefile
 recursive-include test *
 include tiddlywebplugins/templates/*.html
-recursive-include tiddlywebplugins/bfw/resources *

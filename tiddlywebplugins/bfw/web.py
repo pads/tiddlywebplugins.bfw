@@ -53,7 +53,7 @@ def user_home(environ, start_response):
             _, bag = _ensure_wiki_readable(environ, bag.name)
             uri = _uri(environ, bag.name)
             wikis.append({ 'name': bag.name, 'uri': uri })
-        except (ForbiddenError, HTTP404), exc:
+        except ForbiddenError, exc:
             pass
 
     uris = {
@@ -213,9 +213,6 @@ def _ensure_wiki_readable(environ, wiki_name=None):
 
     store = environ['tiddlyweb.store']
     bag = _ensure_bag_exists(wiki_name, store)
-
-    if bag.policy.owner == 'bfw': # system bag -- XXX: does not belong here
-        raise HTTP404('wiki not found')
 
     bag.policy.allows(environ['tiddlyweb.usersign'], 'read')
 
