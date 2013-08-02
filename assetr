@@ -3,8 +3,8 @@
 """
 download remote assets
 
-remote assets are defined by `remote_assets/*.url` files within the package and
-end up in the adjacent `assets` directory, using the corresponding filename
+remote assets are defined by `externals/*.url` files within the package and end
+up in the package's `assets` directory, using the corresponding filename
 """
 
 import sys
@@ -17,7 +17,7 @@ from tiddlyweb.util import std_error_message
 
 def main(args):
     pkg_path = os.path.join('tiddlywebplugins', 'bfw')
-    source_path = os.path.join(pkg_path, 'remote_assets')
+    source_path = 'externals'
     target_path = os.path.join(pkg_path, 'assets')
 
     for filename in os.listdir(source_path):
