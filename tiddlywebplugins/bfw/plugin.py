@@ -4,6 +4,7 @@ TiddlyWeb plugin initialization
 
 from tiddlyweb.util import merge_config
 
+from tiddlywebplugins.static import init as static_init
 from tiddlywebplugins.utils import replace_handler
 
 from . import web, middleware
@@ -23,6 +24,7 @@ def init(config):
     selector.status405 = _error_handler('405 Method Not Allowed',
             'method not allowed')
 
+    static_init(config) # XXX: this doesn't belong here!?
     replace_handler(selector, '/', GET=web.frontpage)
     selector.add('/~', GET=web.user_home)
     selector.add('/register', POST=web.register_user) # XXX: verb as URI
@@ -30,7 +32,6 @@ def init(config):
     selector.add('/pages', POST=web.put_page) # XXX: bad URI?
     selector.add('/editor', GET=web.editor) # XXX: bad URI?
     selector.add('/logout', POST=web.logout)
-    selector.add('/static/{filename:any}', GET=web.static)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
 
