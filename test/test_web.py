@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import tempfile
@@ -15,19 +16,21 @@ from tiddlyweb.model.user import User
 from tiddlyweb.model.policy import Policy
 from tiddlyweb.store import NoTiddlerError, NoBagError
 from tiddlyweb.config import config as CONFIG
+from tiddlyweb.util import merge_config
 from tiddlyweb.web.serve import load_app
+from tiddlyweb.web.util import make_cookie
 from tiddlywebplugins.utils import get_store
 from tiddlywebplugins.imaker import spawn
 
 from tiddlywebplugins.bfw import instance
-
-ADMIN_COOKIE = 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
 
 
 def setup_module(module):
     module.TMPDIR = tempfile.mkdtemp()
 
     _initialize_app(TMPDIR)
+    module.ADMIN_COOKIE = make_cookie('tiddlyweb_user', 'admin',
+            mac_key=CONFIG['secret'])
 
     module.STORE = get_store(CONFIG)
 
@@ -321,7 +324,7 @@ def test_static_assets():
 def _initialize_app(tmpdir): # XXX: side-effecty
     instance_dir = os.path.join(tmpdir, 'instance')
 
-    CONFIG['server_host'] = { # XXX: use `instance.instance_config` instead
+    instance.instance_config['server_host'] = {
         'scheme': 'http',
         'host': 'example.org',
         'port': '8001',
@@ -329,7 +332,13 @@ def _initialize_app(tmpdir): # XXX: side-effecty
     # TODO: test with server_prefix
 
     spawn(instance_dir, CONFIG, instance)
+    old_cwd = os.getcwd()
     os.chdir(instance_dir)
+    # force loading of instance's `tiddlywebconfig.py`
+    while old_cwd in sys.path:
+        sys.path.remove(old_cwd)
+    sys.path.insert(0, os.getcwd())
+    merge_config(CONFIG, {}, reconfig=True) # XXX: should not be necessary!?
 
     # add symlink to templates -- XXX: hacky, should not be necessary!?
     templates_path = instance.__file__.split(os.path.sep)[:-2] + ['templates']
