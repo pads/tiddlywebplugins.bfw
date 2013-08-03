@@ -5,6 +5,6 @@ python:
 
 install:
 - pip install --use-mirrors \
-    `python -c 'from setup import META; print " ".join(META["extras_require"]["build"] + META["extras_require"]["testing"] + META["install_requires"])'`
+    `python -c 'from setup import META; print " ".join(META["extras_require"]["testing"] + META["install_requires"])'`
 
 script: make test
