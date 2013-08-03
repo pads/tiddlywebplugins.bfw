@@ -19,7 +19,6 @@ from tiddlyweb.web.serve import load_app
 from tiddlywebplugins.utils import get_store
 from tiddlywebplugins.imaker import spawn
 
-from tiddlywebplugins.bfw import init
 from tiddlywebplugins.bfw import instance
 
 ADMIN_COOKIE = 'tiddlyweb_user="admin:80b3ae26238e34742fc38f6554e1f710edae71f3"'
@@ -322,20 +321,19 @@ def test_static_assets():
 def _initialize_app(tmpdir): # XXX: side-effecty
     instance_dir = os.path.join(tmpdir, 'instance')
 
-    CONFIG['server_host'] = {
+    CONFIG['server_host'] = { # XXX: use `instance.instance_config` instead
         'scheme': 'http',
         'host': 'example.org',
         'port': '8001',
     }
     # TODO: test with server_prefix
-    CONFIG['system_plugins'].append('tiddlywebplugins.bfw')
-    CONFIG['server_store'] = ['text', {
-        'store_root': os.path.join(instance_dir, 'store')
-    }]
-    CONFIG['secret'] = '0d67d5bbb6c002614efeaf296330fb43'
 
-    init(CONFIG) # required to merge configurations
     spawn(instance_dir, CONFIG, instance)
+    os.chdir(instance_dir)
+
+    # add symlink to templates -- XXX: hacky, should not be necessary!?
+    templates_path = instance.__file__.split(os.path.sep)[:-2] + ['templates']
+    os.symlink(os.path.sep.join(templates_path), 'templates')
 
     httplib2_intercept.install()
     wsgi_intercept.add_wsgi_intercept('example.org', 8001, load_app)
