@@ -5,6 +5,27 @@ wiki-like system for individuals and small teams, emphasizing micro-content and
 based on [TiddlyWeb](http://tiddlyweb.com)
 
 
+Getting Started
+---------------
+
+* `bfwinstance <instance directory>`
+* `cd <instance directory>`
+* `twanager server`
+
+For performance reasons, a dedicated web server (e.g. Apache, Nginx) is
+recommended - see [apache.py](http://tiddlyweb.tiddlyspace.com/apache.py) and
+below.
+
+
+Static Assets
+-------------
+
+It is generally preferable to have static files served by a web server (e.g.
+Apache, Nginx). Thus `twanager assetcopy <target directory>` can be used to copy
+BFW's assets into the respective directory where they can be served by the web
+server of choice.
+
+
 Contributing
 ------------
 

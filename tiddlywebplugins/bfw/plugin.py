@@ -41,7 +41,7 @@ def init(config):
 @make_command()
 def assetcopy(args):
     """
-    copy BFW's static assets into specified target directory
+    Copy BFW's static assets into specified target directory
     """
     from pkg_resources import resource_filename
 
