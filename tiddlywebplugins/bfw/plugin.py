@@ -2,7 +2,11 @@
 TiddlyWeb plugin initialization
 """
 
-from tiddlyweb.util import merge_config
+import sys
+import shutil
+
+from tiddlyweb.manage import make_command
+from tiddlyweb.util import merge_config, std_error_message
 
 from tiddlywebplugins.utils import replace_handler
 
@@ -32,6 +36,27 @@ def init(config):
     selector.add('/logout', POST=web.logout)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
     selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
+
+
+@make_command()
+def assetcopy(args):
+    """
+    copy BFW's static assets into specified target directory
+    """
+    from pkg_resources import resource_filename
+
+    if len(args) != 1:
+        std_error_message('ERROR: invalid target directory')
+        sys.exit(1)
+
+    target_dir = args[0]
+
+    assets_path = resource_filename('tiddlywebplugins.bfw', 'assets')
+    try:
+        shutil.copytree(assets_path, target_dir)
+    except OSError:
+        std_error_message('ERROR: target directory already exists - aborted')
+        sys.exit(2)
 
 
 def _error_handler(status, message):
