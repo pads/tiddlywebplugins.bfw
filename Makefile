@@ -1,10 +1,15 @@
-.PHONY: server terminate dist test qtest remotes clean
+.PHONY: server instance_config terminate dist test qtest remotes clean
 
-server: terminate
+server: terminate instance_config
 	./reloader ./ '^.*\.py$$' twanager server & \
 			echo $$! > .server.pid
 	sleep 0.5
 	touch tiddlywebplugins/__init__.py
+
+instance_config:
+	./bfwinstance dev_instance
+	mv dev_instance/tiddlywebconfig.py ./
+	rm -rf dev_instance
 
 terminate:
 	ps -o pgid -p `cat .server.pid` | tail -n1 | while read pgid; do \
