@@ -87,10 +87,12 @@ def wiki_page(environ, start_response):
 
     title = wiki_name if page_name == 'index' else page_name # XXX: undesirable?
 
+    uris = {
+        'edit': _uri(environ, 'editor', page='%s/%s' % (wiki_name, page_name))
+    }
     return _render_template(environ, start_response, 'wiki_page.html',
-            title=title, page_title=page_name,
+            title=title, page_title=page_name, uris=uris,
             contents=render_wikitext(tiddler, environ))
-
 
 def editor(environ, start_response):
     page = environ['tiddlyweb.query']['page'][0] # TODO: guard against missing parameter

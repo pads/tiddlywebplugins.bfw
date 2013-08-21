@@ -96,6 +96,7 @@ def test_wiki_page():
     response, content = _req('GET', '/bravo/index')
     assert response.status == 200
     assert '<p>lorem ipsum\ndolor <em>sit</em> amet</p>' in content
+    assert '<a href="/editor?page=bravo%2Findex">edit</a>' in content
 
     response, content = _req('GET', '/bravo/HelloWorld')
     assert response.status == 302
