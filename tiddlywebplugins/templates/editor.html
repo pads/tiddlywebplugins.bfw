@@ -1,14 +1,22 @@
 {% extends "layout.html" %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/widearea.css">
+<link rel="stylesheet" href="/static/editor.css">
+{% endblock %}
+
 {% block body %}
 <h1>{{ page_title }}</h1>
 {% if notification %}
 <p class="notification">{{ notification }}</p>
 {% endif %}
-<form action="{{ uris['put_page'] }}" method="post">
+<form action="{{ uris['put_page'] }}" method="post" class="pure-form">
 	<input type="hidden" name="wiki" value="{{ wiki_name }}">
 	<input type="hidden" name="title" value="{{ page_title}}">
-	<textarea name="text">{{ contents }}</textarea>
-	<input type="submit">
+	<textarea name="text" data-widearea="enable">{{ contents }}</textarea>
+	<input type="submit" class="pure-button pure-button-primary">
 </form>
+
+<script src="/static/widearea.js"></script>
+<script src="/static/editor.js"></script>
 {% endblock %}

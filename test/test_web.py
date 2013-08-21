@@ -118,12 +118,12 @@ def test_page_editor():
     assert '<h1>HelloWorld</h1>' in content
     assert '<input type="hidden" name="wiki" value="bravo">' in content
     assert '<input type="hidden" name="title" value="HelloWorld">' in content
-    assert '<textarea name="text"></textarea>' in content
+    assert '<textarea name="text" data-widearea="enable"></textarea>' in content
     assert '"HelloWorld" does not exist yet in wiki "bravo"' in content
 
     response, content = _req('GET', '/editor?page=bravo%2Findex')
     assert response.status == 200
-    assert '<textarea name="text">lorem ipsum\ndolor *sit* amet</textarea>' in content
+    assert '<textarea name="text" data-widearea="enable">lorem ipsum\ndolor *sit* amet</textarea>' in content
     assert not 'does not exist yet' in content
 
 

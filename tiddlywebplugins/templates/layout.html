@@ -4,11 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<title>{{ title }}</title>
-	<link rel="stylesheet" href="/static/pure-min.css">
+	<link rel="stylesheet" href="/static/pure.css">
 	<link rel="shortcut icon" href="/static/favicon.ico">
+	{% block stylesheets %}{% endblock %}
 </head>
 
 <body>
+	<input type="search">
 	{% block body %}{% endblock %}
 </body>
 
