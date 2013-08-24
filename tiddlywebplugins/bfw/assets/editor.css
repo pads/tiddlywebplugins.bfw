@@ -1,4 +1,8 @@
+input.pure-button-primary,
 textarea {
 	width: 100%;
+}
+
+textarea {
 	height: 25em;
 }
