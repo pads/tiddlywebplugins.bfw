@@ -4,10 +4,10 @@ python:
 - 2.7
 
 install:
-- python setup.py develop
 - pip install --use-mirrors \
     `python -c 'from setup import META; print " ".join(META["extras_require"]["testing"] + META["install_requires"])'`
 - pip install coveralls
+- python setup.py develop
 
 script:
 - make remotes

@@ -8,19 +8,6 @@ from tiddlywebplugins.bfw import (__version__ as VERSION, __author__ as AUTHOR,
         __license__ as LICENSE, __doc__ as DESC)
 
 
-class PyTest(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
-
 META = {
     'name': 'tiddlywebplugins.bfw',
     'url': 'https://github.com/FND/tiddlywebplugins.bfw',
@@ -43,10 +30,26 @@ META = {
     'extras_require': {
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
         'coverage': ['figleaf', 'coverage']
-    },
-    'tests_require': ['pytest'],
-    'cmdclass': { 'test': PyTest }
+    }
 }
+
+
+# entry point for tests (required because `coverage` fails to invoke `py.test`
+# in Travis CI's virtualenv)
+
+class PyTest(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+
+META['cmdclass'] = { 'test': PyTest }
 
 
 if __name__ == '__main__':
