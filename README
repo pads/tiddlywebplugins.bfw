@@ -1,5 +1,6 @@
 [Barely Functioning Wiki](https://github.com/FND/tiddlywebplugins.bfw)
 [![build status](https://secure.travis-ci.org/FND/tiddlywebplugins.bfw.png)](http://travis-ci.org/FND/tiddlywebplugins.bfw)
+[![coverage](https://coveralls.io/repos/FND/tiddlywebplugins.bfw/badge.png)](https://coveralls.io/r/FND/tiddlywebplugins.bfw)
 
 wiki-like system for individuals and small teams, emphasizing micro-content and
 based on [TiddlyWeb](http://tiddlyweb.com)
