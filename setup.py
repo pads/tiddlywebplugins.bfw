@@ -1,9 +1,24 @@
+import sys
 import os
 
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
 from tiddlywebplugins.bfw import (__version__ as VERSION, __author__ as AUTHOR,
         __license__ as LICENSE, __doc__ as DESC)
+
+
+class PyTest(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
 
 
 META = {
@@ -28,7 +43,9 @@ META = {
     'extras_require': {
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
         'coverage': ['figleaf', 'coverage']
-    }
+    },
+    'tests_require': ['pytest'],
+    'cmdclass': { 'test': PyTest }
 }
 
 
