@@ -86,9 +86,9 @@ def wiki_page(environ, start_response):
                 page='%s/%s' % (wiki_name, page_name)))
 
     title = wiki_name if page_name == 'index' else page_name # XXX: undesirable?
-
     uris = {
-        'edit': _uri(environ, 'editor', page='%s/%s' % (wiki_name, page_name))
+        'edit': _uri(environ, 'editor', page='%s/%s' % (wiki_name, page_name)),
+        'source': _uri(environ, 'bags', wiki_name, 'tiddlers', page_name) # XXX: should we be using TiddlyWeb URIs?
     }
     return _render_template(environ, start_response, 'wiki_page.html',
             title=title, page_title=page_name, uris=uris,

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<article>
+<article data-source="{{ uris['source'] }}">
 	<h1>{{ page_title }}</h1>
 	<ul class="controls">
 		<li><a href="{{ uris['edit'] }}">edit</a></li>
@@ -10,4 +10,7 @@
 {{ contents }}
 	</section>
 </article>
+
+<script src="/static/jquery.js"></script>
+<script src="/static/markdown.js"></script>
 {% endblock %}
