@@ -12,27 +12,26 @@ function onChange(ev) {
 	var checkbox = $(this);
 	var container = checkbox.closest("[data-source]"); // XXX: inefficient
 	var index = $("ul" + checkboxSelector, container).index(this);
-	var uri = container.data("source");
+	var uri = document.location.toString();
+
 	checkbox.prop("disabled", true);
+	var reactivate = function() { checkbox.prop("disabled", false); };
 	$.ajax({
 		type: "get",
 		url: uri,
-		dataType: "json",
+		dataType: "text",
 		success: function(data, status, xhr) {
-			data = toggleCheckbox(index, data.text);
-			store(data, uri, function(data, status, xhr) {
-				checkbox.prop("disabled", false);
-			});
+			data = toggleCheckbox(index, data);
+			store(data, uri, reactivate);
 		}
 	});
 }
 
 function store(markdown, uri, callback) {
-	var data = { type: "text/x-markdown", text: markdown };
 	$.ajax({
 		type: "put",
 		url: uri,
-		data: JSON.stringify(data),
+		data: markdown,
 		contentType: "application/json",
 		success: callback
 		// TODO: error handling

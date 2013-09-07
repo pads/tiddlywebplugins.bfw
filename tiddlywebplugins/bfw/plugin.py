@@ -35,7 +35,8 @@ def init(config):
     selector.add('/editor', GET=web.editor) # XXX: bad URI?
     selector.add('/logout', POST=web.logout)
     selector.add('/{wiki_name:segment}', GET=web.wiki_home)
-    selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page)
+    selector.add('/{wiki_name:segment}/{page_name:segment}', GET=web.wiki_page,
+            PUT=web.wiki_page)
 
 
 @make_command()
