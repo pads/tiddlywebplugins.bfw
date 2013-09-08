@@ -1,8 +1,6 @@
 import os
 import mimetypes
 
-from pkg_resources import resource_filename, resource_stream
-
 from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
 from tiddlyweb.model.tiddler import Tiddler
