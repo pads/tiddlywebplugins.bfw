@@ -9,8 +9,7 @@ from tiddlyweb.model.user import User
 from tiddlyweb.model.policy import Policy, UserRequiredError, ForbiddenError
 from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.store import NoTiddlerError, NoBagError, NoUserError
-from tiddlyweb.web.util import (get_route_value, make_cookie, read_request_body,
-        content_length_and_type, encode_name)
+from tiddlyweb.web.util import get_route_value, make_cookie, encode_name
 
 from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
@@ -75,33 +74,19 @@ def wiki_home(environ, start_response):
 
 def wiki_page(environ, start_response):
     wiki_name, bag = _ensure_wiki_readable(environ)
-    page_name = get_route_value(environ, 'page_name')
-    is_put = environ['REQUEST_METHOD'] == 'PUT'
 
+    page_name = get_route_value(environ, 'page_name')
     tiddler = Tiddler(page_name, bag.name)
     try:
         tiddler = bag.store.get(tiddler)
     except NoTiddlerError:
-        if not is_put:
-            raise HTTP302(_uri(environ, 'editor',
-                    page='%s/%s' % (wiki_name, page_name)))
-
-    # accept or return raw tiddler text
-    if is_put:
-        length, content_type = content_length_and_type(environ)
-        tiddler.text = read_request_body(environ, length).decode('utf-8')
-        bag.store.put(tiddler)
-        start_response('204 No Content', [])
-        return []
-    elif environ['tiddlyweb.type'][0] == 'text/plain': # XXX: would text/x-markdown be more appropriate?
-        start_response('200 OK',
-                [('Content-Type', 'text/plain; charset=UTF-8')]) # XXX: crude compared to regular `send_tiddler`
-        return [tiddler.text]
+        raise HTTP302(_uri(environ, 'editor',
+                page='%s/%s' % (wiki_name, page_name)))
 
     title = wiki_name if page_name == 'index' else page_name # XXX: undesirable?
     uris = {
         'edit': _uri(environ, 'editor', page='%s/%s' % (wiki_name, page_name)),
-        'source': _uri(environ, 'bags', wiki_name, 'tiddlers', page_name) # XXX: should we be using TiddlyWeb URIs?
+        'source': _uri(environ, 'bags', wiki_name, 'tiddlers', page_name)
     }
     return _render_template(environ, start_response, 'wiki_page.html',
             title=title, page_title=page_name, uris=uris,
