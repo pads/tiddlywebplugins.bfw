@@ -1,8 +1,6 @@
 import os
 import mimetypes
 
-from pkg_resources import resource_filename, resource_stream
-
 from httpexceptor import HTTP302, HTTP400, HTTP401, HTTP404, HTTP409, HTTP415
 
 from tiddlyweb.model.tiddler import Tiddler
@@ -86,9 +84,9 @@ def wiki_page(environ, start_response):
                 page='%s/%s' % (wiki_name, page_name)))
 
     title = wiki_name if page_name == 'index' else page_name # XXX: undesirable?
-
     uris = {
-        'edit': _uri(environ, 'editor', page='%s/%s' % (wiki_name, page_name))
+        'edit': _uri(environ, 'editor', page='%s/%s' % (wiki_name, page_name)),
+        'source': _uri(environ, 'bags', wiki_name, 'tiddlers', page_name)
     }
     return _render_template(environ, start_response, 'wiki_page.html',
             title=title, page_title=page_name, uris=uris,

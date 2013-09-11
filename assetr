@@ -3,14 +3,15 @@
 """
 download remote assets
 
-remote assets are defined by `externals/*.url` files within the package and end
-up in the package's `assets` directory, using the corresponding filename
+remote assets are defined by `externals/*.{url,pkg}` files within the package
+and end up in the package's `assets` directory, using the corresponding filename
 """
 
 import sys
 import os
 
 from urllib import urlretrieve
+from pkg_resources import resource_stream
 
 from tiddlyweb.util import std_error_message
 
@@ -22,11 +23,24 @@ def main(args):
 
     for filename in os.listdir(source_path):
         source = os.path.join(source_path, filename)
-        target = os.path.join(target_path, filename[:-4]) # strip ".url"
+        target = os.path.join(target_path, filename[:-4]) # strip extension
+        extension = filename[-3:]
+
         with open(source) as fh:
-            url = fh.read().strip()
-            std_error_message('downloading %s from %s' % (target, url))
-            urlretrieve(url, target)
+            reference = fh.read().strip()
+
+        if extension == 'url':
+            std_error_message('downloading %s from %s' % (target, reference))
+            urlretrieve(reference, target)
+        elif extension == 'pkg':
+            package, filepath = reference.split(': ', 1)
+            std_error_message('retrieving %s from %s/%s' % (target, package,
+                    filepath))
+            contents = resource_stream(package, filepath).read()
+            with open(target, 'w') as fh:
+                fh.write(contents)
+        else:
+            raise NotImplementedError('unknown extension: %s' % extension)
 
     return True
 
