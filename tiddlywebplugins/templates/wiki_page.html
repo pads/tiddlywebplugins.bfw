@@ -1,7 +1,11 @@
 {% extends "layout.html" %}
 
+{% block links %}
+<link rel="edit" href="{{ uris['source'] }}">
+{% endblock %}
+
 {% block body %}
-<article data-source="{{ uris['source'] }}">
+<article>
 	<h1>{{ page_title }}</h1>
 	<ul class="controls">
 		<li><a href="{{ uris['edit'] }}">edit</a></li>

@@ -18,7 +18,7 @@ function makeHandlers() { // uses closures for shared state
 		};
 	}
 	var retriever = function(checkbox, callback) {
-		cache.uri = checkbox.closest("article[data-source]").data("source");
+		cache.uri = $(document.head).find("link[rel=edit]").attr("href");
 		$.ajax({
 			type: "get",
 			url: cache.uri,
