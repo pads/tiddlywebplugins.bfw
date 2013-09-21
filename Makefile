@@ -1,14 +1,14 @@
-.PHONY: server instance_config terminate dist test qtest remotes clean
+.PHONY: server instance terminate dist test qtest remotes clean
 
-server: terminate instance_config
+server: terminate
 	./reloader ./ '^.*\.py$$' twanager server & \
 			echo $$! > .server.pid
 	sleep 0.5
 	touch tiddlywebplugins/__init__.py
 
-instance_config:
+instance: remotes
 	./bfwinstance dev_instance
-	mv dev_instance/tiddlywebconfig.py ./
+	mv dev_instance/* ./
 	rm -rf dev_instance
 
 terminate:
@@ -25,12 +25,14 @@ qtest:
 	py.test -s --tb=short test
 
 remotes:
+	twibuilder tiddlywebplugins.bfw
 	./assetr
 
 clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm || true
 	rm -r dist || true
 	rm -r tiddlywebplugins.bfw.egg-info || true
+	rm -r tiddlywebplugins/bfw/resources || true
 	# remove remote assets
 	git rm -r tiddlywebplugins/bfw/assets # fails if there are modifications
 	rm -r tiddlywebplugins/bfw/assets || true

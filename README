@@ -33,6 +33,8 @@ Contributing
 * install dependencies (optionally using virtualenv):
 
         $ pip install --use-mirrors \
-            `python -c 'from setup import META; print " ".join(META["extras_require"]["testing"] + META["install_requires"])'`
+            `python -c 'from setup import META; print " ".join(META["extras_require"]["testing"] + META["extras_require"]["build"] + META["install_requires"])'`
 
 * run tests: `make test`
+* create a dev instance: `make instance`
+* launch the server: `make server`

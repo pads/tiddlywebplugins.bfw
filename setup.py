@@ -28,6 +28,7 @@ META = {
             'tiddlywebplugins.templates', 'tiddlywebplugins.markdown>=1.1.0',
             'markdown-checklist>=0.2.0', 'tiddlywebplugins.imaker'],
     'extras_require': {
+        'build': ['tiddlywebplugins.ibuilder'],
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
         'coverage': ['figleaf', 'coverage']
     }

@@ -23,6 +23,7 @@ from tiddlywebplugins.utils import get_store
 from tiddlywebplugins.imaker import spawn
 
 from tiddlywebplugins.bfw import instance
+from tiddlywebplugins.bfw.config import config as init_config
 
 
 def setup_module(module):
@@ -68,6 +69,8 @@ def test_root():
 
     assert 'Log in' in content
     assert 'Register' in content
+    uri = "https://github.com/FND/tiddlywebplugins.bfw"
+    assert '<a href="%s">BFW</a>' % uri in content
 
     response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
 
@@ -322,7 +325,7 @@ def test_static_assets():
     #assert response.status == 200
 
 
-def _initialize_app(tmpdir): # XXX: side-effecty
+def _initialize_app(tmpdir): # XXX: side-effecty and inscrutable
     instance_dir = os.path.join(tmpdir, 'instance')
 
     instance.instance_config['server_host'] = {
@@ -332,7 +335,7 @@ def _initialize_app(tmpdir): # XXX: side-effecty
     }
     # TODO: test with server_prefix
 
-    spawn(instance_dir, CONFIG, instance)
+    spawn(instance_dir, init_config, instance)
     old_cwd = os.getcwd()
     os.chdir(instance_dir)
     # force loading of instance's `tiddlywebconfig.py`

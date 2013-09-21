@@ -40,8 +40,16 @@ def frontpage(environ, start_response):
             'register': _uri(environ, 'register'),
             'login': _uri(environ, 'challenge', 'cookie_form')
         }
+
+        tiddler = Tiddler('index', 'meta')
+        store = environ['tiddlyweb.store']
+        try:
+            tiddler = store.get(tiddler)
+        except NoTiddlerError: # this should never occur
+            pass
+
         return _render_template(environ, start_response, 'frontpage.html',
-                uris=uris)
+                contents=render_wikitext(tiddler, environ), uris=uris)
 
 
 def user_home(environ, start_response):
