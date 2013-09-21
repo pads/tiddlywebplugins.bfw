@@ -38,7 +38,7 @@ def frontpage(environ, start_response):
     else: # unauth'd
         uris = {
             'register': _uri(environ, 'register'),
-            'login': _uri(environ, 'challenge', tiddlyweb_redirect='/~')
+            'login': _uri(environ, 'challenge', 'cookie_form')
         }
         return _render_template(environ, start_response, 'frontpage.html',
                 uris=uris)

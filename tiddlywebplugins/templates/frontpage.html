@@ -2,7 +2,17 @@
 
 {% block body %}
 
-<a href="{{ uris['login'] }}">Log in</a>
+<form action="{{ uris['login'] }}" method="post" class="pure-form">
+	<fieldset>
+		<legend>Log in</legend>
+
+		<input type="text" name="user" placeholder="username">
+		<input type="password" name="password" placeholder="password">
+
+		<input type="hidden" name="tiddlyweb_redirect" value="/~">
+		<input type="submit" class="pure-button" value="Log in">
+	</fieldset>
+</form>
 
 <form action="{{ uris['register'] }}" method="post" class="pure-form">
 	<fieldset>
