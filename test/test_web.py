@@ -17,6 +17,7 @@ from tiddlyweb.model.policy import Policy
 from tiddlyweb.store import NoTiddlerError, NoBagError
 from tiddlyweb.config import config as CONFIG
 from tiddlyweb.util import merge_config
+from tiddlyweb.manage import handle
 from tiddlyweb.web.serve import load_app
 from tiddlyweb.web.util import make_cookie
 from tiddlywebplugins.utils import get_store
@@ -62,6 +63,21 @@ def teardown_module(module):
     shutil.rmtree(TMPDIR)
 
 
+def test_assetcopy(): # XXX: does not belong here
+    target_dir = os.path.join(TMPDIR, 'static_assets')
+
+    with raises(SystemExit): # no directory provided
+        handle(['', 'assetcopy'])
+
+    handle(['', 'assetcopy', target_dir])
+
+    entries = os.listdir(target_dir)
+    assert 'favicon.ico' in entries
+
+    with raises(SystemExit): # directory already exists
+        handle(['', 'assetcopy', target_dir])
+
+
 def test_root():
     response, content = _req('GET', '/')
     assert response.status == 200
@@ -72,8 +88,13 @@ def test_root():
     uri = "https://github.com/FND/tiddlywebplugins.bfw"
     assert '<a href="%s">BFW</a>' % uri in content
 
-    response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
+    frontpage = Tiddler('index', 'meta')
+    frontpage = STORE.delete(frontpage)
+    response, content = _req('GET', '/')
+    assert response.status == 200
+    assert '<a href="%s">BFW</a>' % uri not in content
 
+    response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
     assert response.status == 302
     assert response['location'] == '/~'
 
