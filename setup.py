@@ -30,7 +30,7 @@ META = {
     'extras_require': {
         'build': ['tiddlywebplugins.ibuilder'],
         'testing': ['pytest', 'wsgi-intercept', 'httplib2'],
-        'coverage': ['figleaf', 'coverage']
+        'coverage': ['coverage']
     }
 }
 

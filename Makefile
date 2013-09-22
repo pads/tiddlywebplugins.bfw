@@ -1,4 +1,4 @@
-.PHONY: server instance terminate dist test qtest remotes clean
+.PHONY: server instance terminate dist test qtest remotes lint coverage clean
 
 server: terminate
 	./reloader ./ '^.*\.py$$' twanager server & \
@@ -28,11 +28,25 @@ remotes:
 	twibuilder tiddlywebplugins.bfw
 	./assetr
 
+lint:
+	find . -name "*.py" -not -path "./venv/*" | while read filepath; do \
+		pep8 --ignore=E128,E261 $$filepath; \
+	done
+
+coverage: clean remotes
+	coverage run --omit="venv/*" `which py.test` test
+	coverage html
+	# reports
+	coverage report
+	@echo "[INFO] additional reports in \`htmlcov/index.html\`"
+
+
 clean:
 	find . -name "*.pyc" -print0 | xargs -0 rm || true
 	rm -r dist || true
 	rm -r tiddlywebplugins.bfw.egg-info || true
 	rm -r tiddlywebplugins/bfw/resources || true
+	rm -r .coverage htmlcov/ || true
 	# remove remote assets
 	git rm -r tiddlywebplugins/bfw/assets # fails if there are modifications
 	rm -r tiddlywebplugins/bfw/assets || true
