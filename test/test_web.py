@@ -36,9 +36,14 @@ def setup_module(module):
 
     module.STORE = get_store(CONFIG)
 
-    user = User('admin')
-    user.set_password('secret')
-    STORE.put(user)
+    # register admin user
+    data = {
+        'username': 'admin',
+        'password': 'secret',
+        'password_confirmation': 'secret'
+    }
+    response, content = _req('POST', '/register', urlencode(data),
+            headers={ 'Content-Type': 'application/x-www-form-urlencoded' })
 
     bag = Bag('alpha')
     bag.policy = Policy(read=['admin'], write=['admin'], create=['admin'],
@@ -106,10 +111,12 @@ def test_user_home():
     response, content = _req('GET', '/~', headers={ 'Cookie': ADMIN_COOKIE })
     assert response.status == 200
     assert '<a href="/meta">meta</a>' in content
+    assert '<a href="/admin">admin</a>' in content
     assert '<a href="/alpha">alpha</a>' in content
     assert '<a href="/bravo">bravo</a>' in content
     assert not 'charlie' in content
     assert '<option value="meta">' not in content
+    assert '<option value="admin">' in content
     assert '<option value="alpha">' in content
     assert '<option value="bravo">' in content
 
@@ -175,11 +182,47 @@ def test_user_registration():
         'password': 'foo',
         'password_confirmation': 'foo'
     }
+
+    assert not _bag_exists('fnd')
+
     response, content = _req('POST', '/register', urlencode(data),
             headers=headers)
-
     assert response.status == 303
     assert 'tiddlyweb_user="fnd:' in response['set-cookie']
+    bag = _bag_exists('fnd')
+    assert bag
+    assert bag.policy.read == ['fnd']
+
+    bag = Bag('sandbox')
+    STORE.put(bag)
+    _data = {}
+    _data.update(data)
+    _data['username'] = 'sandbox'
+    response, content = _req('POST', '/register', urlencode(_data),
+            headers=headers)
+    assert response.status == 409
+
+    response, content = _req('POST', '/register', urlencode(data),
+            headers=headers)
+    assert response.status == 409 # already exists
+
+    data['username'] = 'wikis'
+    response, content = _req('POST', '/register', urlencode(data),
+            headers=headers)
+    assert response.status == 409 # blacklisted
+
+    # ensure personal index page is created automatically
+    data = {
+        'username': 'dummy',
+        'password': 'foo',
+        'password_confirmation': 'foo'
+    }
+    response, content = _req('POST', '/register', urlencode(data),
+            headers={ 'Content-Type': 'application/x-www-form-urlencoded' })
+    cookie = make_cookie('tiddlyweb_user', 'dummy', mac_key=CONFIG['secret'])
+    response, content = _req('GET', '/~', headers={ 'Cookie': cookie })
+    assert response.status == 200
+    assert "dummy's personal wiki" in content
 
 
 def test_login():
@@ -410,6 +453,6 @@ def _bag_exists(bag_name):
     bag = Bag(bag_name)
     try:
         STORE.get(bag)
-        return True
+        return bag
     except NoBagError:
         return False

@@ -15,6 +15,9 @@ from tiddlywebplugins.logout import logout as logout_handler
 from tiddlywebplugins.templates import get_template
 
 
+BLACKLIST = ['bags', 'recipes', 'wikis', 'pages', '~', 'register', 'logout'] # XXX: too manual, hard to keep in sync
+
+
 def ensure_form_submission(fn): # TODO: move elsewhere
     """
     decorator to ensure the request was a form submission
@@ -141,25 +144,11 @@ def create_wiki(environ, start_response):
 
     wiki_name = environ['tiddlyweb.query']['wiki'][0] # TODO: validate
     private = environ['tiddlyweb.query'].get('private', [''])[0] == '1'
-    store = environ['tiddlyweb.store']
 
-    # check reserved terms
-    blacklist = ['bags', 'recipes', 'wikis', 'pages', '~', 'register', 'logout'] # XXX: too manual, hard to keep in sync
-    if wiki_name in blacklist:
+    if wiki_name in BLACKLIST:
         raise HTTP409('wiki name unavailable')
 
-    bag = Bag(wiki_name)
-    try:
-        store.get(bag)
-        raise HTTP409('wiki name unavailable')
-    except NoBagError:
-        pass
-
-    read_constraint = [current_user] if private else None
-    bag.policy = Policy(read=read_constraint, write=[current_user],
-            create=[current_user], delete=[current_user], manage=[current_user]) # XXX: too limiting!?
-
-    store.put(bag)
+    _create_wiki(environ['tiddlyweb.store'], wiki_name, current_user, private)
 
     wiki_uri = _uri(environ, wiki_name).encode('UTF-8') # XXX: should include host!?
     start_response('303 See Other', [('Location', wiki_uri)])
@@ -197,15 +186,24 @@ def register_user(environ, start_response):
     store = environ['tiddlyweb.store']
     try:
         store.get(user)
-        raise HTTP409('username unavailable')
+        available = False
     except NoUserError:
-        pass
+        available = username not in BLACKLIST
+    if not available:
+        raise HTTP409('username unavailable')
 
     if not password == confirmation:
         raise HTTP400('passwords do not match')
 
+    _create_wiki(store, username, username, private=True)
+
     user.set_password(password)
     store.put(user)
+
+    index = Tiddler('index', username)
+    index.type = 'text/x-markdown'
+    index.text = "Welcome to %s's personal wiki." % username
+    store.put(index)
 
     root_uri = _uri(environ, '')
 
@@ -230,6 +228,20 @@ def _render_template(environ, start_response, name, status='200 OK', headers={},
         headers['Content-Type'] = 'text/html; charset=UTF-8'
     start_response(status, headers.items())
     return template.generate(**data)
+
+
+def _create_wiki(store, name, owner, private):
+    bag = Bag(name)
+    try:
+        store.get(bag)
+        raise HTTP409('wiki name unavailable')
+    except NoBagError:
+        pass
+
+    read_constraint = [owner] if private else None
+    bag.policy = Policy(read=read_constraint, write=[owner], create=[owner],
+            delete=[owner], manage=[owner]) # XXX: too limiting!?
+    store.put(bag)
 
 
 def _ensure_wiki_readable(environ, wiki_name=None):
