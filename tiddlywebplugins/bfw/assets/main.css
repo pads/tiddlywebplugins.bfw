@@ -8,7 +8,7 @@ aside {
 }
 
 aside input,
-aside[role=form] .pure-form input {
+aside .pure-form.panel input {
 	display: block;
 }
 

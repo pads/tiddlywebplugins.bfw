@@ -4,7 +4,7 @@
 
 <p>hello {{ user }}</p>
 
-<aside role="form">
+<aside>
 {% if wikis %}
 <h3>Your Wikis</h3>
 <ul>
@@ -16,7 +16,7 @@
 </ul>
 {% endif %}
 
-<form action="{{ uris['create_wiki'] }}" method="post" class="pure-form">
+<form action="{{ uris['create_wiki'] }}" method="post" class="pure-form panel">
 	<fieldset>
 		<legend>Create Wiki</legend>
 
@@ -31,7 +31,7 @@
 </form>
 
 {% if wikis %}
-<form action="{{ uris['create_page'] }}" method="post" class="pure-form">
+<form action="{{ uris['create_page'] }}" method="post" class="pure-form panel">
 	<fieldset>
 		<legend>Create Page</legend>
 
