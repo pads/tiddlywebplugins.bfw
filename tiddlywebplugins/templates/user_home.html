@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 
-{% block body %}
+{% block links %}
+<link rel="stylesheet" href="/static/widearea.css">
+{% endblock %}
 
+{% block body %}
 <p>hello {{ user }}</p>
 
 <aside>
@@ -44,7 +47,7 @@
 			</select>
 		</label>
 		<input type="text" name="title" placeholder="title">
-		<textarea name="text"></textarea>
+		<textarea name="text" data-widearea="enable"></textarea>
 
 		<input type="submit" value="Create Page" class="pure-button pure-button-primary">
 	</fieldset>
@@ -52,4 +55,6 @@
 {% endif %}
 </aside>
 
+<script src="/static/widearea.js"></script>
+<script src="/static/editor.js"></script>
 {% endblock %}
