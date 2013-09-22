@@ -349,13 +349,6 @@ def test_static_assets():
 def _initialize_app(tmpdir): # XXX: side-effecty and inscrutable
     instance_dir = os.path.join(tmpdir, 'instance')
 
-    instance.instance_config['server_host'] = {
-        'scheme': 'http',
-        'host': 'example.org',
-        'port': '8001',
-    }
-    # TODO: test with server_prefix
-
     spawn(instance_dir, init_config, instance)
     old_cwd = os.getcwd()
     os.chdir(instance_dir)
@@ -364,6 +357,13 @@ def _initialize_app(tmpdir): # XXX: side-effecty and inscrutable
         sys.path.remove(old_cwd)
     sys.path.insert(0, os.getcwd())
     merge_config(CONFIG, {}, reconfig=True) # XXX: should not be necessary!?
+
+    CONFIG['server_host'] = {
+        'scheme': 'http',
+        'host': 'example.org',
+        'port': '8001',
+    }
+    # TODO: test with server_prefix
 
     # add symlink to templates -- XXX: hacky, should not be necessary!?
     templates_path = instance.__file__.split(os.path.sep)[:-2] + ['templates']
