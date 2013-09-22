@@ -64,7 +64,12 @@ def user_home(environ, start_response):
         try:
             _, bag = _ensure_wiki_readable(environ, bag.name)
             uri = _uri(environ, bag.name)
-            wikis.append({ 'name': bag.name, 'uri': uri })
+            try:
+                bag.policy.allows(environ['tiddlyweb.usersign'], 'write')
+                writable = True
+            except ForbiddenError, exc:
+                writable = False
+            wikis.append({ 'name': bag.name, 'uri': uri, 'writable': writable })
         except ForbiddenError, exc:
             pass
 

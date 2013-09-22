@@ -105,9 +105,13 @@ def test_user_home():
 
     response, content = _req('GET', '/~', headers={ 'Cookie': ADMIN_COOKIE })
     assert response.status == 200
+    assert '<a href="/meta">meta</a>' in content
     assert '<a href="/alpha">alpha</a>' in content
     assert '<a href="/bravo">bravo</a>' in content
     assert not 'charlie' in content
+    assert '<option value="meta">' not in content
+    assert '<option value="alpha">' in content
+    assert '<option value="bravo">' in content
 
     bag = Bag('admin')
     index = Tiddler('index', bag.name)

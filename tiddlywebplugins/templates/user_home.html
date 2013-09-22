@@ -42,7 +42,9 @@
 			wiki
 			<select name="wiki">
 				{% for wiki in wikis %}
-				<option value="{{ wiki['name'] }}">{{ wiki['name'] }}</option>
+					{% if wiki.writable %}
+					<option value="{{ wiki['name'] }}">{{ wiki['name'] }}</option>
+					{% endif %}
 				{% endfor %}
 			</select>
 		</label>
