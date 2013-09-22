@@ -85,11 +85,11 @@ def test_root():
 
     assert 'Log in' in content
     assert 'Register' in content
-    uri = "https://github.com/FND/tiddlywebplugins.bfw"
+    uri = 'https://github.com/FND/tiddlywebplugins.bfw'
     assert '<a href="%s">BFW</a>' % uri in content
 
     frontpage = Tiddler('index', 'meta')
-    frontpage = STORE.delete(frontpage)
+    frontpage = STORE.delete(frontpage) # XXX: side-effecty
     response, content = _req('GET', '/')
     assert response.status == 200
     assert '<a href="%s">BFW</a>' % uri not in content
@@ -108,6 +108,19 @@ def test_user_home():
     assert '<a href="/alpha">alpha</a>' in content
     assert '<a href="/bravo">bravo</a>' in content
     assert not 'charlie' in content
+
+    bag = Bag('admin')
+    index = Tiddler('index', bag.name)
+    index.text = 'hello world'
+    STORE.put(bag)
+    STORE.put(index)
+    response, content = _req('GET', '/~', headers={ 'Cookie': ADMIN_COOKIE })
+    assert response.status == 200
+    assert 'hello world' in content
+
+    response, content = _req('GET', '/', headers={ 'Cookie': ADMIN_COOKIE })
+    assert response.status == 302
+    assert response['location'] == '/~'
 
 
 def test_wiki_page():

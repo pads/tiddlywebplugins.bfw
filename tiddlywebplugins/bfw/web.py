@@ -58,6 +58,7 @@ def user_home(environ, start_response):
         raise HTTP401('unauthorized')
 
     store = environ['tiddlyweb.store']
+
     wikis = []
     for bag in store.list_bags():
         try:
@@ -67,12 +68,19 @@ def user_home(environ, start_response):
         except ForbiddenError, exc:
             pass
 
+    tiddler = Tiddler('index', current_user)
+    try:
+        tiddler = store.get(tiddler)
+    except NoTiddlerError: # this should never occur
+        pass
+
     uris = {
         'create_wiki': _uri(environ, 'wikis'),
         'create_page': _uri(environ, 'pages')
     }
     return _render_template(environ, start_response, 'user_home.html',
-            user=current_user, wikis=wikis, uris=uris)
+            user=current_user, wikis=wikis,
+            contents=render_wikitext(tiddler, environ), uris=uris)
 
 
 def wiki_home(environ, start_response):
