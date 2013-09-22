@@ -12,6 +12,21 @@ aside[role=form] .pure-form input {
 	display: block;
 }
 
+aside input[type=checkbox],
+aside .pure-form input[type=checkbox] {
+	display: inline;
+}
+
+ul,
+h1, h2, h3, h4, h5, h6,
+.pure-form input {
+	margin: 0 0 0.5em;
+}
+
+ul {
+	padding-left: 1.5em;
+}
+
 .notification {
 	border-radius: 4px;
 	padding: 5px;
