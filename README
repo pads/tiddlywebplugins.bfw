@@ -9,13 +9,14 @@ based on [TiddlyWeb](http://tiddlyweb.com)
 Getting Started
 ---------------
 
+* clone this repository
 * `bfwinstance <instance directory>`
 * `cd <instance directory>`
 * `twanager server`
 
 For performance reasons, a dedicated web server (e.g. Apache, Nginx) is
 recommended - see [apache.py](http://tiddlyweb.tiddlyspace.com/apache.py) and
-below.
+the assets section below.
 
 
 Static Assets
