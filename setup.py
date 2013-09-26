@@ -19,6 +19,7 @@ META = {
     'author_email': '',
     'maintainer': 'FND',
     'packages': find_packages(exclude=['test']),
+    'namespace_packages': ['tiddlywebplugins'],
     'scripts': ['bfwinstance'],
     'platforms': 'Posix; MacOS X; Windows',
     'include_package_data': True,
