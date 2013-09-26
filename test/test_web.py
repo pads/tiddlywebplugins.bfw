@@ -70,6 +70,10 @@ def teardown_module(module):
 
 def test_assetcopy(): # XXX: does not belong here
     target_dir = os.path.join(TMPDIR, 'static_assets')
+    # capture STDERR to avoid confusion -- XXX: might interefere with reporting - belongs into setup/teardown
+    stderr = sys.stderr
+    from StringIO import StringIO
+    sys.stderr = StringIO()
 
     with raises(SystemExit): # no directory provided
         handle(['', 'assetcopy'])
@@ -81,6 +85,8 @@ def test_assetcopy(): # XXX: does not belong here
 
     with raises(SystemExit): # directory already exists
         handle(['', 'assetcopy', target_dir])
+
+    sys.stderr = stderr # restore
 
 
 def test_root():
