@@ -38,4 +38,4 @@ Contributing
 
 * run tests: `make test`
 * create a dev instance: `make instance`
-* launch the server: `make server`
+* launch the server: `make server` (Linux users: requires package inotify-tools)
